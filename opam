@@ -1,0 +1,15 @@
+opam-version: "1.2"
+name: "records"
+version: "0.1.0"
+maintainer: "Etienne Millon <etienne@cryptosense.com>"
+authors: "Etienne Millon <etienne@cryptosense.com>"
+homepage: "https://github.com/cryptosense/records"
+dev-repo: "https://github.com/cryptosense/records.git"
+bug-reports: "https://github.com/cryptosense/records/issues"
+license: "BSD-2"
+build: [
+  [make]
+]
+install: [make "install"]
+remove: ["ocamlfind" "remove" "records"]
+depends: "ocamlfind" {build}
