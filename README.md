@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cryptosense/records.svg)](https://travis-ci.org/cryptosense/records)
+
 Dynamic records
 ===============
 

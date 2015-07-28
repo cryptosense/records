@@ -12,4 +12,7 @@ build: [
 ]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "records"]
-depends: "ocamlfind" {build}
+depends: [
+  "ocamlfind" {build}
+  "yojson"
+]
