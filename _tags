@@ -1,1 +1,2 @@
 true: package(yojson)
+<tests.*>: package(oUnit)

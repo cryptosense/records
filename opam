@@ -10,9 +10,11 @@ license: "BSD-2"
 build: [
   [make]
 ]
+build-test: [make "check"]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "records"]
 depends: [
   "ocamlfind" {build}
+  "ounit" {test}
   "yojson"
 ]
