@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "records"
-version: "0.1.0"
+version: "0.1.0+dev"
 maintainer: "Etienne Millon <etienne@cryptosense.com>"
 authors: "Etienne Millon <etienne@cryptosense.com>"
 homepage: "https://github.com/cryptosense/records"
