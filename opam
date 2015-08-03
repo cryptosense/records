@@ -1,17 +1,13 @@
 opam-version: "1.2"
-name: "records"
-version: "0.1.0+dev"
 maintainer: "Etienne Millon <etienne@cryptosense.com>"
 authors: "Etienne Millon <etienne@cryptosense.com>"
 homepage: "https://github.com/cryptosense/records"
-dev-repo: "https://github.com/cryptosense/records.git"
 bug-reports: "https://github.com/cryptosense/records/issues"
 license: "BSD-2"
-build: [
-  [make]
-]
-build-test: [make "cov"]
+dev-repo: "https://github.com/cryptosense/records.git"
+build: [make]
 install: [make "install"]
+build-test: [make "check"]
 remove: ["ocamlfind" "remove" "records"]
 depends: [
   "bisect_ppx" {test}
@@ -19,3 +15,4 @@ depends: [
   "ounit" {test}
   "yojson"
 ]
+available: [ocaml-version >= "4.01.0"]
