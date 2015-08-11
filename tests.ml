@@ -23,25 +23,29 @@ let set_get ctxt =
 let get_undef ctxt =
   let r = Record.make rt in
   let e = Record.UndefinedField "x" in
-  assert_raises e @@ fun () ->
+  assert_raises e (fun () ->
     Record.get r x
+  )
 
 let extend_after_seal ctxt =
   let e = Record.ModifyingSealedStruct "r" in
-  assert_raises e @@ fun () ->
+  assert_raises e (fun () ->
     Record.field rt "y" Type.int
+  )
 
 let seal_twice ctxt =
   let e = Record.ModifyingSealedStruct "r" in
-  assert_raises e @@ fun () ->
+  assert_raises e (fun () ->
     Record.seal rt
+  )
 
 let make_unsealed ctxt (type r2) =
   let rt2 : r2 Record.layout = Record.declare "r2" in
   let _x2 = Record.field rt2 "x2" Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
-  assert_raises e @@ fun () ->
+  assert_raises e (fun () ->
     Record.make rt2
+  )
 
 let layout_name ctxt =
   assert_equal "r" (Record.layout_name rt)

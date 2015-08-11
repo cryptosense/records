@@ -10,9 +10,11 @@ install: [make "install"]
 build-test: [make "check"]
 remove: ["ocamlfind" "remove" "records"]
 depends: [
-  "bisect_ppx" {test}
   "ocamlfind" {build}
   "ounit" {test}
   "yojson"
 ]
-available: [ocaml-version >= "4.01.0"]
+depopts: [
+  "bisect_ppx" {test}
+]
+available: [ocaml-version >= "4.00.0"]

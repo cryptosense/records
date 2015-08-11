@@ -140,4 +140,4 @@ let of_json (type s) (s: s layout) (json: Yojson.Basic.json) : s t =
   s
 
 let format (type s) fmt (s: s t) : unit =
-  Format.fprintf fmt "%s" (to_json s |> Yojson.Basic.to_string )
+  Format.fprintf fmt "%s" (Yojson.Basic.to_string (to_json s))
