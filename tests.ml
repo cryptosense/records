@@ -109,7 +109,7 @@ let json_product ctxt  =
   let recovered = Record.of_json rpt json in
   assert_equal (3, 14) (Record.get recovered value_p)
 
-let json_list ctxt  =
+let json_list ctxt =
   let r = Record.make rlt in
   Record.set r value_l [3; 14; 15];
   let json =
@@ -128,6 +128,47 @@ let json_list ctxt  =
   let recovered = Record.of_json rlt json in
   assert_equal [3; 14; 15] (Record.get recovered value_l)
 
+let declare1 ctxt =
+  let (l, f) = Record.declare1 ~name:"r" ~f1_name:"x" ~f1_type:Type.int in
+  assert_equal "r" (Record.layout_name l);
+  assert_equal "x" (Record.field_name f)
+
+let declare2 ctxt =
+  let (l, f1, f2) =
+    Record.declare2 ~name:"r"
+      ~f1_name:"f1" ~f1_type:Type.int
+      ~f2_name:"f2" ~f2_type:Type.int
+  in
+  assert_equal "r" (Record.layout_name l);
+  assert_equal "f1" (Record.field_name f1);
+  assert_equal "f2" (Record.field_name f2)
+
+let declare3 ctxt =
+  let (l, f1, f2, f3) =
+    Record.declare3 ~name:"r"
+      ~f1_name:"f1" ~f1_type:Type.int
+      ~f2_name:"f2" ~f2_type:Type.int
+      ~f3_name:"f3" ~f3_type:Type.int
+  in
+  assert_equal "r" (Record.layout_name l);
+  assert_equal "f1" (Record.field_name f1);
+  assert_equal "f2" (Record.field_name f2);
+  assert_equal "f3" (Record.field_name f3)
+
+let declare4 ctxt =
+  let (l, f1, f2, f3, f4) =
+    Record.declare4 ~name:"r"
+      ~f1_name:"f1" ~f1_type:Type.int
+      ~f2_name:"f2" ~f2_type:Type.int
+      ~f3_name:"f3" ~f3_type:Type.int
+      ~f4_name:"f4" ~f4_type:Type.int
+  in
+  assert_equal "r" (Record.layout_name l);
+  assert_equal "f1" (Record.field_name f1);
+  assert_equal "f2" (Record.field_name f2);
+  assert_equal "f3" (Record.field_name f3);
+  assert_equal "f4" (Record.field_name f4)
+
 let suite =
   "Records" >:::
     [ "Set & get" >:: set_get
@@ -145,6 +186,10 @@ let suite =
     ; "JSON writer (null field)" >:: to_json_null
     ; "JSON (product)" >:: json_product
     ; "JSON (list)" >:: json_list
+    ; "declare1" >:: declare1
+    ; "declare2" >:: declare2
+    ; "declare3" >:: declare3
+    ; "declare4" >:: declare4
     ]
 
 let _ = run_test_tt_main suite

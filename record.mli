@@ -70,3 +70,41 @@ val equal: 'a layout -> 'b layout -> ('a, 'b) Polid.equal
 
 (** Print the JSON representation of a record to a formatter. *)
 val format: Format.formatter -> 'a t -> unit
+
+(** Shortcut to build a layout with 1 field. *)
+val declare1 : name:string
+            -> f1_name:string
+            -> f1_type:'a Type.t
+            -> ('s layout * ('a, 's) field)
+
+(** Shortcut to build a layout with 2 fields. *)
+val declare2 : name:string
+            -> f1_name:string
+            -> f1_type:'a1 Type.t
+            -> f2_name:string
+            -> f2_type:'a2 Type.t
+            -> ('s layout * ('a1, 's) field * ('a2, 's) field)
+
+(** Shortcut to build a layout with 3 fields. *)
+val declare3 : name:string
+            -> f1_name:string
+            -> f1_type:'a1 Type.t
+            -> f2_name:string
+            -> f2_type:'a2 Type.t
+            -> f3_name:string
+            -> f3_type:'a3 Type.t
+            -> ('s layout * ('a1, 's) field * ('a2, 's) field
+                          * ('a3, 's) field)
+
+(** Shortcut to build a layout with 4 fields. *)
+val declare4 : name:string
+            -> f1_name:string
+            -> f1_type:'a1 Type.t
+            -> f2_name:string
+            -> f2_type:'a2 Type.t
+            -> f3_name:string
+            -> f3_type:'a3 Type.t
+            -> f4_name:string
+            -> f4_type:'a4 Type.t
+            -> ('s layout * ('a1, 's) field * ('a2, 's) field
+                          * ('a3, 's) field * ('a4, 's) field)
