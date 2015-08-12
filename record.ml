@@ -139,5 +139,47 @@ let of_json (type s) (s: s layout) (json: Yojson.Basic.json) : s t =
     s.layout.fields;
   s
 
+let layout_type layout =
+  let name = layout_name layout in
+  let to_json = to_json in
+  let of_json = of_json layout in
+  Type.make
+    ~name
+    ~to_json
+    ~of_json
+    ()
+
 let format (type s) fmt (s: s t) : unit =
   Format.fprintf fmt "%s" (Yojson.Basic.to_string (to_json s))
+
+let declare1 ~name ~f1_name ~f1_type =
+  let layout = declare name in
+  let f1 = field layout f1_name f1_type in
+  seal layout;
+  (layout, f1)
+
+let declare2 ~name ~f1_name ~f1_type ~f2_name ~f2_type =
+  let layout = declare name in
+  let f1 = field layout f1_name f1_type in
+  let f2 = field layout f2_name f2_type in
+  seal layout;
+  (layout, f1, f2)
+
+let declare3 ~name ~f1_name ~f1_type ~f2_name ~f2_type
+                          ~f3_name ~f3_type =
+  let layout = declare name in
+  let f1 = field layout f1_name f1_type in
+  let f2 = field layout f2_name f2_type in
+  let f3 = field layout f3_name f3_type in
+  seal layout;
+  (layout, f1, f2, f3)
+
+let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type
+                          ~f3_name ~f3_type ~f4_name ~f4_type =
+  let layout = declare name in
+  let f1 = field layout f1_name f1_type in
+  let f2 = field layout f2_name f2_type in
+  let f3 = field layout f3_name f3_type in
+  let f4 = field layout f4_name f4_type in
+  seal layout;
+  (layout, f1, f2, f3, f4)
