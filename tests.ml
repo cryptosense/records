@@ -169,6 +169,27 @@ let declare4 ctxt =
   assert_equal "f3" (Record.field_name f3);
   assert_equal "f4" (Record.field_name f4)
 
+let layout_type ctxt =
+  let rt_typ = Record.layout_type rt in
+  let (la, fa1, fa2) =
+    Record.declare2 ~name:"pair"
+      ~f1_name:"f1" ~f1_type:rt_typ
+      ~f2_name:"f2" ~f2_type:rt_typ
+  in
+  let r = Record.make rt in
+  Record.set r x 3;
+  let rp = Record.make la in
+  Record.set rp fa1 r;
+  Record.set rp fa2 r;
+  let printer = Yojson.Basic.pretty_to_string in
+  let expected =
+    `Assoc
+      [ ("f1", `Assoc [("x", `Int 3)])
+      ; ("f2", `Assoc [("x", `Int 3)])
+      ]
+  in
+  assert_equal ~ctxt ~printer expected (Record.to_json rp)
+
 let suite =
   "Records" >:::
     [ "Set & get" >:: set_get
@@ -190,6 +211,7 @@ let suite =
     ; "declare2" >:: declare2
     ; "declare3" >:: declare3
     ; "declare4" >:: declare4
+    ; "layout_type" >:: layout_type
     ]
 
 let _ = run_test_tt_main suite

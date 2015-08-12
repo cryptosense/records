@@ -65,6 +65,9 @@ val to_json: 'a t -> Yojson.Basic.json
 (** Convert a JSON value into a given schema. *)
 val of_json: 'a layout -> Yojson.Basic.json -> 'a t
 
+(** Get the [Type.t] representation of a layout. *)
+val layout_type : 'a layout -> 'a t Type.t
+
 (** Equality predicate. *)
 val equal: 'a layout -> 'b layout -> ('a, 'b) Polid.equal
 

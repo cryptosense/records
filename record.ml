@@ -139,6 +139,16 @@ let of_json (type s) (s: s layout) (json: Yojson.Basic.json) : s t =
     s.layout.fields;
   s
 
+let layout_type layout =
+  let name = layout_name layout in
+  let to_json = to_json in
+  let of_json = of_json layout in
+  Type.make
+    ~name
+    ~to_json
+    ~of_json
+    ()
+
 let format (type s) fmt (s: s t) : unit =
   Format.fprintf fmt "%s" (Yojson.Basic.to_string (to_json s))
 
