@@ -6,6 +6,7 @@
 - Bisect is not necessary to run the test suite
 - Add `Record.declare{1,2,3,4}` to build fixed-size layouts
 - Add `Record.layout_type` to use layout as types
+- Add 'yojson' dependency to the META file (#3), thanks Jeremy Yallop!
 
 ## v0.1.0
 
