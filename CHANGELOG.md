@@ -1,4 +1,6 @@
-## unreleased
+## v0.2.0
+
+*2015-08-17*
 
 - Sort OPAM fields
 - Add ocaml-version bound
