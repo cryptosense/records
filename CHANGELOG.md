@@ -1,5 +1,7 @@
 ## unreleased
 
+- Delete embedded .travis-opam.sh (#2)
+
 ## v0.2.0
 
 *2015-08-17*
