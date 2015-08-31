@@ -128,6 +128,10 @@ let json_list ctxt =
   let recovered = Record.of_json rlt json in
   assert_equal [3; 14; 15] (Record.get recovered value_l)
 
+let declare0 ctxt =
+  let l = Record.declare0 ~name:"r" in
+  assert_equal "r" (Record.layout_name l)
+
 let declare1 ctxt =
   let (l, f) = Record.declare1 ~name:"r" ~f1_name:"x" ~f1_type:Type.int in
   assert_equal "r" (Record.layout_name l);
@@ -207,6 +211,7 @@ let suite =
     ; "JSON writer (null field)" >:: to_json_null
     ; "JSON (product)" >:: json_product
     ; "JSON (list)" >:: json_list
+    ; "declare0" >:: declare0
     ; "declare1" >:: declare1
     ; "declare2" >:: declare2
     ; "declare3" >:: declare3
