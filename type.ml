@@ -75,3 +75,12 @@ let int =
     ~to_json: (fun s -> `Int s)
     ~of_json: (Yojson.Basic.Util.to_int)
     ()
+
+let view ~name ~read ~write typ =
+  let to_json b =
+    typ.to_json (write b)
+  in
+  let of_json bj =
+    read (typ.of_json bj)
+  in
+  make ~name ~to_json ~of_json ()

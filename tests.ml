@@ -194,6 +194,20 @@ let layout_type ctxt =
   in
   assert_equal ~ctxt ~printer expected (Record.to_json rp)
 
+let view ctxt =
+  let open Type in
+  let int_array =
+    view
+      ~name:"int_array"
+      ~read:Array.of_list
+      ~write:Array.to_list
+      (list int)
+  in
+  let j = `List [`Int 3 ; `Int 14 ; `Int 15] in
+  let a = [|3 ; 14 ; 15|] in
+  assert_equal ~ctxt a (int_array.of_json j);
+  assert_equal ~ctxt j (int_array.to_json a)
+
 let suite =
   "Records" >:::
     [ "Set & get" >:: set_get
@@ -217,6 +231,7 @@ let suite =
     ; "declare3" >:: declare3
     ; "declare4" >:: declare4
     ; "layout_type" >:: layout_type
+    ; "view" >:: view
     ]
 
 let _ = run_test_tt_main suite

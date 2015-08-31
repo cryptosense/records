@@ -44,3 +44,7 @@ val list: 'a t -> 'a list t
     The labels identify the elements, not their types.
  *)
 val product_2: string -> 'a t -> string -> 'b t -> ('a * 'b) t
+
+(** Build a ['b] type which has the same JSON encoding as the ['a] type from
+    conversion functions [read] and [write]. *)
+val view : name:string -> read:('a -> 'b) -> write:('b -> 'a) -> 'a t -> 'b t
