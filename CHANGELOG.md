@@ -2,6 +2,7 @@
 
 - Delete embedded .travis-opam.sh (#2)
 - Add `Record.declare0` (#4)
+- Add `Type.view` (#5)
 
 ## v0.2.0
 
