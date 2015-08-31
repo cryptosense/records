@@ -152,6 +152,11 @@ let layout_type layout =
 let format (type s) fmt (s: s t) : unit =
   Format.fprintf fmt "%s" (Yojson.Basic.to_string (to_json s))
 
+let declare0 ~name =
+  let layout = declare name in
+  seal layout;
+  layout
+
 let declare1 ~name ~f1_name ~f1_type =
   let layout = declare name in
   let f1 = field layout f1_name f1_type in

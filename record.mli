@@ -74,6 +74,9 @@ val equal: 'a layout -> 'b layout -> ('a, 'b) Polid.equal
 (** Print the JSON representation of a record to a formatter. *)
 val format: Format.formatter -> 'a t -> unit
 
+(** Shortcut to build a layout with no fields. *)
+val declare0 : name:string -> 's layout
+
 (** Shortcut to build a layout with 1 field. *)
 val declare1 : name:string
             -> f1_name:string
