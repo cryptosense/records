@@ -1,4 +1,4 @@
-version = "0.2.0+dev"
+version = "0.3.0"
 description = "Dynamic records"
 archive(byte) = "records.cma"
 archive(native) = "records.cmxa"

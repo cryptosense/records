@@ -1,4 +1,6 @@
-## unreleased
+## v0.3.0
+
+*2015-08-31*
 
 - Delete embedded .travis-opam.sh (#2)
 - Add `Record.declare0` (#4)
