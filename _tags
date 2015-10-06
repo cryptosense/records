@@ -1,2 +1,3 @@
 true: package(yojson)
 <tests.*>: package(oUnit)
+true: safe_string
