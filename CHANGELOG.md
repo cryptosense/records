@@ -1,5 +1,7 @@
 ## unreleased
 
+- Compile with `-safe-string` (#6)
+
 ## v0.3.0
 
 *2015-08-31*
