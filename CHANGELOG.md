@@ -1,4 +1,6 @@
-## unreleased
+## v0.3.1
+
+*2015-12-01*
 
 - Compile with `-safe-string` (#6)
 - Add a bytecode-only target
