@@ -1,9 +1,14 @@
-.PHONY: all install uninstall clean check cov
+.PHONY: all byte opt install uninstall clean check cov
 PACKAGE=records
 MLI=record type polid
-OBJ=$(addprefix _build/, $(addsuffix .cmi, $(MLI)) $(PACKAGE).cma $(PACKAGE).cmxa $(PACKAGE).a)
+OBJ=$(addprefix _build/, $(addsuffix .cmi, $(MLI)) $(PACKAGE).cma)
+NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a)
 
-all: $(OBJ)
+all: byte opt
+
+byte: $(OBJ)
+
+opt: $(NATIVE_OBJ)
 
 check:
 	ocamlbuild -use-ocamlfind tests.native --
@@ -21,7 +26,7 @@ _build/%:
 	ocamlbuild -use-ocamlfind $*
 
 install: uninstall
-	ocamlfind install $(PACKAGE) $(OBJ) META
+	ocamlfind install $(PACKAGE) META $(OBJ) -optional $(NATIVE_OBJ)
 
 uninstall:
 	ocamlfind remove $(PACKAGE)

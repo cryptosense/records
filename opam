@@ -5,7 +5,10 @@ homepage: "https://github.com/cryptosense/records"
 bug-reports: "https://github.com/cryptosense/records/issues"
 license: "BSD-2"
 dev-repo: "https://github.com/cryptosense/records.git"
-build: [make]
+build: [
+    [make] {ocaml-native}
+    [make "byte"] {!ocaml-native}
+]
 install: [make "install"]
 build-test: [make "check"]
 remove: ["ocamlfind" "remove" "records"]
