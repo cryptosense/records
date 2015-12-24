@@ -60,8 +60,9 @@ let field (type s) (type a) (layout: s layout) label (ty : a Type.t):
 type 'a t =
   {
     layout: 'a layout;
-    content: 'a;
+    content: 'a content;
   }
+and 'a content
 
 exception AllocatingUnsealedStruct of string
 
