@@ -57,6 +57,36 @@ val set: 's t -> ('a,'s) field -> 'a -> unit
 (** Raised by [get] if the field was not set. *)
 exception UndefinedField of string
 
+(** {3} Safe interface *)
+module Safe :
+sig
+  module type LAYOUT =
+  sig
+    type s
+
+    (** A value representing the layout. *)
+    val layout : s layout
+
+    (** Add a field to the layout. This modifies the layout and returns the field. *)
+    val field : string -> 'a Type.t -> ('a, s) field
+
+    (** Make the layout unmodifiable. It is necessary before constructing values. *)
+    val seal : unit -> unit
+
+    (** The name that was given to the layout. *)
+    val layout_name : string
+
+    (** The unique identifier given to a layout. *)
+    val layout_id : s Polid.t
+
+    (** Allocate a record of the layout, with all fields initially unset. *)
+    val make : unit -> s t
+  end
+
+  (** Create a new layout with the given name. *)
+  val declare : string -> (module LAYOUT)
+end
+
 (** {2} Miscellaneous *)
 
 (** Convert a record to JSON. *)
