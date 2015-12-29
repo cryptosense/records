@@ -36,8 +36,9 @@ val layout_id: 's layout -> 's Polid.t
 type 's t =
   {
     layout: 's layout;
-    content: 's;
+    content: 's content;
   }
+and 's content
 
 (** Allocate a record of a given layout, with all fields initially unset. *)
 val make: 's layout -> 's t
