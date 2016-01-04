@@ -1,4 +1,6 @@
-## unreleased
+## v0.4.0
+
+*2016-01-04*
 
 - Make the type of 'content' abstract (#7)
 - Add a Safe sub-module for type-safe creation of layouts (#8),
