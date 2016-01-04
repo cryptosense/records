@@ -189,3 +189,31 @@ let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type
   let f4 = field layout f4_name f4_type in
   seal layout;
   (layout, f1, f2, f3, f4)
+
+module Safe =
+struct
+  module type LAYOUT =
+  sig
+    type s
+    val layout : s layout
+    val field : string -> 'a Type.t -> ('a, s) field
+    val seal : unit -> unit
+    val layout_name : string
+    val layout_id : s Polid.t
+    val make : unit -> s t
+  end
+
+  module Declare(X: sig val name : string end) : LAYOUT =
+  struct
+    type s
+    let layout = declare X.name
+    let field n t = field layout n t
+    let seal () = seal layout
+    let layout_name = layout.name
+    let layout_id = layout.uid
+    let make () = make layout
+  end
+
+  let declare : string -> (module LAYOUT) =
+    fun name -> (module (Declare (struct let name = name end)))
+end
