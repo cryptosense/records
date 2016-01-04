@@ -1,5 +1,9 @@
 ## unreleased
 
+- Make the type of 'content' abstract (#7)
+- Add a Safe sub-module for type-safe creation of layouts (#8),
+  thanks Jeremy Yallop!
+
 ## v0.3.1
 
 *2015-12-01*
