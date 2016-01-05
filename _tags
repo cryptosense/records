@@ -1,3 +1,4 @@
+true: bin_annot
 true: package(yojson)
 <tests.*>: package(oUnit)
 true: safe_string
