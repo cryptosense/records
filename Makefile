@@ -2,7 +2,7 @@
 PACKAGE=records
 MLI=record type polid
 OBJ=$(addprefix _build/, $(addsuffix .cmi, $(MLI)) $(PACKAGE).cma)
-NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a)
+NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a $(PACKAGE).cmxs)
 
 all: byte opt
 
@@ -26,7 +26,7 @@ _build/%:
 	ocamlbuild -use-ocamlfind $*
 
 install: uninstall
-	ocamlfind install $(PACKAGE) META $(OBJ) -optional $(NATIVE_OBJ)
+	ocamlfind install $(PACKAGE) META $(OBJ) *.mli -optional $(NATIVE_OBJ) _build/*.cmt _build/*.cmti
 
 uninstall:
 	ocamlfind remove $(PACKAGE)
