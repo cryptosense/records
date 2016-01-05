@@ -26,7 +26,7 @@ _build/%:
 	ocamlbuild -use-ocamlfind $*
 
 install: uninstall
-	ocamlfind install $(PACKAGE) META $(OBJ) -optional $(NATIVE_OBJ)
+	ocamlfind install $(PACKAGE) META $(OBJ) *.mli -optional $(NATIVE_OBJ)
 
 uninstall:
 	ocamlfind remove $(PACKAGE)
