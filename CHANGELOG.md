@@ -1,5 +1,7 @@
 ## unreleased
 
+- Install .cmxs, .cmt, .cmti, .mli files (#10)
+
 ## v0.4.0
 
 *2016-01-04*
