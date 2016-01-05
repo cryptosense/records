@@ -2,7 +2,7 @@
 PACKAGE=records
 MLI=record type polid
 OBJ=$(addprefix _build/, $(addsuffix .cmi, $(MLI)) $(PACKAGE).cma)
-NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a)
+NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a $(PACKAGE).cmxs)
 
 all: byte opt
 
