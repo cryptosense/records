@@ -1,19 +1,19 @@
 open OUnit2
 
 type r
-let rt : r Record.layout = Record.declare "r"
-let x = Record.field rt "x" Type.int
-let () = Record.seal rt
+let rt : r Record.layout = Record.Unsafe.declare "r"
+let x = Record.Unsafe.field rt "x" Type.int
+let () = Record.Unsafe.seal rt
 
 type p
-let rpt : p Record.layout = Record.declare "rp"
-let value_p = Record.field rpt "value_pair" (Type.product_2 "fst" Type.int "snd" Type.int)
-let () = Record.seal rpt
+let rpt : p Record.layout = Record.Unsafe.declare "rp"
+let value_p = Record.Unsafe.field rpt "value_pair" (Type.product_2 "fst" Type.int "snd" Type.int)
+let () = Record.Unsafe.seal rpt
 
 type l
-let rlt : l Record.layout = Record.declare "rl"
-let value_l = Record.field rlt "value_list" (Type.list Type.int)
-let () = Record.seal rlt
+let rlt : l Record.layout = Record.Unsafe.declare "rl"
+let value_l = Record.Unsafe.field rlt "value_list" (Type.list Type.int)
+let () = Record.Unsafe.seal rlt
 
 module Safe_layouts =
 struct
@@ -31,18 +31,18 @@ struct
 end
 
 let set_get ctxt =
-  let r = Record.make rt in
+  let r = Record.Unsafe.make rt in
   Record.set r x 2;
   assert_equal 2 (Record.get r x)
 
 let safe_set_get ctxt =
   let open Safe_layouts in
-  let r = Record.make Rt.layout in
+  let r = Rt.make () in
   Record.set r x 2;
   assert_equal 2 (Record.get r x)
 
 let get_undef ctxt =
-  let r = Record.make rt in
+  let r = Record.Unsafe.make rt in
   let e = Record.UndefinedField "x" in
   assert_raises e (fun () ->
     Record.get r x
@@ -50,7 +50,7 @@ let get_undef ctxt =
 
 let safe_get_undef ctxt =
   let open Safe_layouts in
-  let r = Record.make Rt.layout in
+  let r = Rt.make () in
   let e = Record.UndefinedField "x" in
   assert_raises e (fun () ->
     Record.get r x
@@ -59,35 +59,35 @@ let safe_get_undef ctxt =
 let extend_after_seal ctxt =
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
-    Record.field rt "y" Type.int
+    Record.Unsafe.field rt "y" Type.int
   )
 
 let safe_extend_after_seal ctxt =
   let open Safe_layouts in
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
-    Record.field Rt.layout "y" Type.int
+    Record.Unsafe.field Rt.layout "y" Type.int
   )
 
 let seal_twice ctxt =
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
-    Record.seal rt
+    Record.Unsafe.seal rt
   )
 
 let safe_seal_twice ctxt =
   let open Safe_layouts in
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
-    Record.seal Rt.layout
+    Record.Unsafe.seal Rt.layout
   )
 
 let make_unsealed ctxt (type r2) =
-  let rt2 : r2 Record.layout = Record.declare "r2" in
-  let _x2 = Record.field rt2 "x2" Type.int in
+  let rt2 : r2 Record.layout = Record.Unsafe.declare "r2" in
+  let _x2 = Record.Unsafe.field rt2 "x2" Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
   assert_raises e (fun () ->
-    Record.make rt2
+    Record.Unsafe.make rt2
   )
 
 let safe_make_unsealed ctxt (type r2) =
@@ -95,18 +95,18 @@ let safe_make_unsealed ctxt (type r2) =
   let _x2 = Rt2.field "x2" Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
   assert_raises e (fun () ->
-    Record.make Rt2.layout
+    Rt2.make ()
   )
 
 let layout_name ctxt =
-  assert_equal "r" (Record.layout_name rt)
+  assert_equal "r" (Record.Unsafe.layout_name rt)
 
 let safe_layout_name ctxt =
   assert_equal "r" Safe_layouts.Rt.layout_name
 
 let layout_id ctxt =
-  let id1 = Record.layout_id rt in
-  let id2 = Record.layout_id rt in
+  let id1 = Record.Unsafe.layout_id rt in
+  let id2 = Record.Unsafe.layout_id rt in
   let id3 = Polid.fresh () in
   assert_bool "layout_id is pure" (Polid.equal id1 id2 = Polid.Equal);
   assert_equal ~msg:"layout_id is pure (int)" (Polid.to_int id1) (Polid.to_int id2);
@@ -131,12 +131,12 @@ let safe_field_type ctxt =
   assert_equal "int" (Record.field_type Safe_layouts.x).Type.name
 
 let record_layout ctxt =
-  let r = Record.make rt in
+  let r = Record.Unsafe.make rt in
   let l = Record.get_layout r in
   assert_bool "layout is the same"
     (Polid.is_equal
-      (Record.layout_id l)
-      (Record.layout_id rt)
+      (Record.Unsafe.layout_id l)
+      (Record.Unsafe.layout_id rt)
     )
 
 let safe_record_layout ctxt =
@@ -145,7 +145,7 @@ let safe_record_layout ctxt =
   let l = Record.get_layout r in
   assert_bool "layout is the same"
     (Polid.is_equal
-      (Record.layout_id l)
+      (Record.Unsafe.layout_id l)
       Rt.layout_id
     )
 
@@ -160,7 +160,7 @@ let safe_of_json ctxt =
   assert_equal 2 (Record.get r Safe_layouts.x)
 
 let to_json ctxt =
-  let r = Record.make rt in
+  let r = Record.Unsafe.make rt in
   Record.set r x 2;
   let expected = `Assoc [("x", `Int 2)] in
   let printer = Yojson.Basic.pretty_to_string in
@@ -175,7 +175,7 @@ let safe_to_json ctxt =
   assert_equal ~printer expected (Record.to_json r)
 
 let to_json_null ctxt =
-  let r = Record.make rt in
+  let r = Record.Unsafe.make rt in
   let expected = `Assoc [("x", `Null)] in
   let printer = Yojson.Basic.pretty_to_string in
   assert_equal ~printer expected (Record.to_json r)
@@ -188,7 +188,7 @@ let safe_to_json_null ctxt =
   assert_equal ~printer expected (Record.to_json r)
 
 let json_product ctxt  =
-  let r = Record.make rpt in
+  let r = Record.Unsafe.make rpt in
   Record.set r value_p (3, 14);
   let json =
     `Assoc
@@ -225,7 +225,7 @@ let safe_json_product ctxt  =
   assert_equal (3, 14) (Record.get recovered value_p)
 
 let json_list ctxt =
-  let r = Record.make rlt in
+  let r = Record.Unsafe.make rlt in
   Record.set r value_l [3; 14; 15];
   let json =
     `Assoc
@@ -265,11 +265,11 @@ let safe_json_list ctxt =
 
 let declare0 ctxt =
   let l = Record.declare0 ~name:"r" in
-  assert_equal "r" (Record.layout_name l)
+  assert_equal "r" (Record.Unsafe.layout_name l)
 
 let declare1 ctxt =
   let (l, f) = Record.declare1 ~name:"r" ~f1_name:"x" ~f1_type:Type.int in
-  assert_equal "r" (Record.layout_name l);
+  assert_equal "r" (Record.Unsafe.layout_name l);
   assert_equal "x" (Record.field_name f)
 
 let declare2 ctxt =
@@ -278,7 +278,7 @@ let declare2 ctxt =
       ~f1_name:"f1" ~f1_type:Type.int
       ~f2_name:"f2" ~f2_type:Type.int
   in
-  assert_equal "r" (Record.layout_name l);
+  assert_equal "r" (Record.Unsafe.layout_name l);
   assert_equal "f1" (Record.field_name f1);
   assert_equal "f2" (Record.field_name f2)
 
@@ -289,7 +289,7 @@ let declare3 ctxt =
       ~f2_name:"f2" ~f2_type:Type.int
       ~f3_name:"f3" ~f3_type:Type.int
   in
-  assert_equal "r" (Record.layout_name l);
+  assert_equal "r" (Record.Unsafe.layout_name l);
   assert_equal "f1" (Record.field_name f1);
   assert_equal "f2" (Record.field_name f2);
   assert_equal "f3" (Record.field_name f3)
@@ -302,7 +302,7 @@ let declare4 ctxt =
       ~f3_name:"f3" ~f3_type:Type.int
       ~f4_name:"f4" ~f4_type:Type.int
   in
-  assert_equal "r" (Record.layout_name l);
+  assert_equal "r" (Record.Unsafe.layout_name l);
   assert_equal "f1" (Record.field_name f1);
   assert_equal "f2" (Record.field_name f2);
   assert_equal "f3" (Record.field_name f3);
@@ -315,9 +315,9 @@ let layout_type ctxt =
       ~f1_name:"f1" ~f1_type:rt_typ
       ~f2_name:"f2" ~f2_type:rt_typ
   in
-  let r = Record.make rt in
+  let r = Record.Unsafe.make rt in
   Record.set r x 3;
-  let rp = Record.make la in
+  let rp = Record.Unsafe.make la in
   Record.set rp fa1 r;
   Record.set rp fa2 r;
   let printer = Yojson.Basic.pretty_to_string in
