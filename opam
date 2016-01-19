@@ -20,4 +20,4 @@ depends: [
 depopts: [
   "bisect_ppx" {test}
 ]
-available: [ocaml-version >= "4.00.0"]
+available: [ocaml-version >= "4.02.0"]

@@ -3,6 +3,7 @@
 - Install .cmxs, .cmt, .cmti, .mli files (#10)
 - Move `declare`, `field`, `seal`, `make`, `layout_name` and
   `layout_id` to a `Record.Unsafe` submodule (#9)
+- Require ocaml >= 4.02.0 for deprecation warnings
 
 ## v0.4.0
 
