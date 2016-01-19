@@ -1,6 +1,8 @@
 ## unreleased
 
 - Install .cmxs, .cmt, .cmti, .mli files (#10)
+- Move `declare`, `field`, `seal`, `make`, `layout_name` and
+  `layout_id` to a `Record.Unsafe` submodule (#9)
 
 ## v0.4.0
 
