@@ -1,8 +1,11 @@
+open Ast_helper
+open Asttypes
+open Location
+open Longident
+open Parsetree
+
 (** Return an expression representing the "typ" value for a type *)
 let typ_exp ctyp =
-  let open Ast_helper in
-  let open Location in
-  let open Parsetree in
   match ctyp.ptyp_desc with
   | Ptyp_constr (lid, []) ->
     let typ_name = Ppx_deriving.mangle_lid (`Suffix "typ") lid.txt in
@@ -20,57 +23,56 @@ let make_list exprs =
   List.fold_right cons exprs nil
 
 let string_lit s =
-  let open Ast_helper in
-  let open Asttypes in
   Exp.constant (Const_string (s, None))
 
+(** Return a pair:
+    the first one is used in [to_json], the second one in [of_json]
+*)
+let make_json_cases ld =
+  let field = ld.pld_name.txt in
+  let typ = typ_exp ld.pld_type in
+  let lid = mknoloc (Lident field) in
+  let str = string_lit field in
+  let to_json = [%expr [%e typ].to_json] in
+  let of_json = [%expr [%e typ].of_json] in
+  let to_json_case =
+    let value =
+      Exp.field [%expr x] (mknoloc (Lident field))
+    in
+    [%expr
+      ([%e str], [%e to_json] [%e value])
+    ]
+  in
+  let of_json_case =
+    (lid, [%expr [%e of_json] (Yojson.Basic.Util.member [%e str] j)])
+  in
+  (to_json_case, of_json_case)
+
 let make_binding decl =
-  let open Ast_helper in
-  let open Asttypes in
-  let open Location in
-  let open Longident in
-  let open Parsetree in
   let name = Ppx_deriving.mangle_type_decl (`Suffix "typ") decl in
   let pat = Pat.var (mknoloc name) in
   let tk = decl.ptype_kind in
   let expr =
     match tk with
     | Ptype_record lds ->
-      let make_to_json_case ld =
-        let to_json = [%expr [%e typ_exp ld.pld_type].to_json] in
-        let field = ld.pld_name.txt in
-        let value =
-          Exp.field [%expr x] (mknoloc (Lident field))
-        in
-        [%expr
-          ([%e string_lit field], [%e to_json] [%e value])
-        ]
-      in
-      let make_of_json_case ld =
-        let field = ld.pld_name.txt in
-        let lid = mknoloc (Lident field) in
-        let of_json = [%expr [%e typ_exp ld.pld_type].of_json] in
-        (lid, [%expr [%e of_json] (Yojson.Basic.Util.member [%e string_lit field] j)])
-      in
+      let cases = List.map make_json_cases lds in
+      let (to_json_cases, of_json_cases) = List.split cases in
       [%expr
         let open Type in
         let to_json x =
-          `Assoc [%e make_list (List.map make_to_json_case lds)]
+          `Assoc [%e make_list to_json_cases]
         in
         let of_json j =
-          [%e Exp.record (List.map make_of_json_case lds) None ]
+          [%e Exp.record of_json_cases None ]
         in
         let name = [%e string_lit name] in
         Type.make ~name ~to_json ~of_json ()
       ]
-
     | _ -> assert false
   in
   Vb.mk pat expr
 
 let type_decl_str ~options ~path decls =
-  let open Ast_helper in
-  let open Asttypes in
   let vbs =
     List.map make_binding decls
   in
