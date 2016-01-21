@@ -1,14 +1,17 @@
-.PHONY: all byte opt install uninstall clean check cov
+.PHONY: all byte opt install uninstall clean check cov ppx
 PACKAGE=records
 MLI=record type polid
 OBJ=$(addprefix _build/, $(addsuffix .cmi, $(MLI)) $(PACKAGE).cma)
 NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a $(PACKAGE).cmxs)
+PPX=_build/ppx_deriving_typ.cmxs
 
 all: byte opt
 
 byte: $(OBJ)
 
 opt: $(NATIVE_OBJ)
+
+ppx: $(PPX)
 
 check:
 	ocamlbuild -use-ocamlfind tests.native --
@@ -26,7 +29,7 @@ _build/%:
 	ocamlbuild -use-ocamlfind $*
 
 install: uninstall
-	ocamlfind install $(PACKAGE) META $(OBJ) *.mli -optional $(NATIVE_OBJ) _build/*.cmt _build/*.cmti
+	ocamlfind install $(PACKAGE) META $(OBJ) *.mli -optional $(NATIVE_OBJ) _build/*.cmt _build/*.cmti $(PPX)
 
 uninstall:
 	ocamlfind remove $(PACKAGE)
