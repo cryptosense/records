@@ -268,9 +268,8 @@ module Unsafe = struct
     layout.sealed <- true;
     ()
 
-  let field (type s) (type a) (layout: s layout) label (bty : a Basic_type.t):
+  let field (type s) (type a) (layout: s layout) label (ty : a Type.t):
     (a,s) field =
-    let ty = safe_type_of_basic_type bty in
     field_safe layout label ty
 
   let make (type s) : s layout -> s t =
@@ -293,7 +292,7 @@ end
 
 let declare = Unsafe.declare
 let seal = Unsafe.seal
-let field = Unsafe.field
+let field l k t = Unsafe.field l k (safe_type_of_basic_type t)
 let make = Unsafe.make
 let layout_name = Unsafe.layout_name
 let layout_id = Unsafe.layout_id

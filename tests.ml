@@ -2,17 +2,17 @@ open OUnit2
 
 type r
 let rt : r Record.layout = Record.Unsafe.declare "r"
-let x = Record.Unsafe.field rt "x" Type.int
+let x = Record.Unsafe.field rt "x" Record.Type.int
 let () = Record.Unsafe.seal rt
 
 type p
 let rpt : p Record.layout = Record.Unsafe.declare "rp"
-let value_p = Record.Unsafe.field rpt "value_pair" (Type.product_2 "fst" Type.int "snd" Type.int)
+let value_p = Record.Unsafe.field rpt "value_pair" (Record.Type.product_2 "fst" Record.Type.int "snd" Record.Type.int)
 let () = Record.Unsafe.seal rpt
 
 type l
 let rlt : l Record.layout = Record.Unsafe.declare "rl"
-let value_l = Record.Unsafe.field rlt "value_list" (Type.list Type.int)
+let value_l = Record.Unsafe.field rlt "value_list" (Record.Type.list Record.Type.int)
 let () = Record.Unsafe.seal rlt
 
 module Safe_layouts =
@@ -59,14 +59,14 @@ let safe_get_undef ctxt =
 let extend_after_seal ctxt =
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
-    Record.Unsafe.field rt "y" Type.int
+    Record.Unsafe.field rt "y" Record.Type.int
   )
 
 let safe_extend_after_seal ctxt =
   let open Safe_layouts in
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
-    Record.Unsafe.field Rt.layout "y" Type.int
+    Record.Unsafe.field Rt.layout "y" Record.Type.int
   )
 
 let seal_twice ctxt =
@@ -84,7 +84,7 @@ let safe_seal_twice ctxt =
 
 let make_unsealed ctxt (type r2) =
   let rt2 : r2 Record.layout = Record.Unsafe.declare "r2" in
-  let _x2 = Record.Unsafe.field rt2 "x2" Type.int in
+  let _x2 = Record.Unsafe.field rt2 "x2" Record.Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
   assert_raises e (fun () ->
     Record.Unsafe.make rt2

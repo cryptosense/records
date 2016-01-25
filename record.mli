@@ -119,33 +119,6 @@ val set: 's t -> ('a,'s) field -> 'a -> unit
 (** Raised by [get] if the field was not set. *)
 exception UndefinedField of string
 
-(** {3} Unsafe interface *)
-module Unsafe : sig
-  (** The [Unsafe.declare] function returns a ['s layout], which is only safe
-      when ['s] is only instanciated once in this context.
-
-      @see <https://github.com/cryptosense/records/pull/8> for discussion
-   *)
-
-  (** Create a new layout with the given name. *)
-  val declare : string -> 's layout
-
-  (** Add a field to a layout. This modifies the layout and returns the field. *)
-  val field: 's layout -> string -> 'a Type.t -> ('a,'s) field
-
-  (** Make the layout unmodifiable. It is necessary before constructing values. *)
-  val seal : 's layout -> unit
-
-  (** Allocate a record of a given layout, with all fields initially unset. *)
-  val make: 's layout -> 's t
-
-  (** Get the name that was given to a layout. *)
-  val layout_name : 's layout -> string
-
-  (** Get the unique identifier given to a layout. *)
-  val layout_id: 's layout -> 's Polid.t
-end
-
 (** {3} Type converters *)
 module Type : sig
   (**
@@ -204,6 +177,33 @@ module Field : sig
 
   (** Get the type of the field (as passed to [field]). *)
   val ftype : ('a, 's) field -> 'a Type.t
+end
+
+(** {3} Unsafe interface *)
+module Unsafe : sig
+  (** The [Unsafe.declare] function returns a ['s layout], which is only safe
+      when ['s] is only instanciated once in this context.
+
+      @see <https://github.com/cryptosense/records/pull/8> for discussion
+   *)
+
+  (** Create a new layout with the given name. *)
+  val declare : string -> 's layout
+
+  (** Add a field to a layout. This modifies the layout and returns the field. *)
+  val field: 's layout -> string -> 'a Type.t -> ('a,'s) field
+
+  (** Make the layout unmodifiable. It is necessary before constructing values. *)
+  val seal : 's layout -> unit
+
+  (** Allocate a record of a given layout, with all fields initially unset. *)
+  val make: 's layout -> 's t
+
+  (** Get the name that was given to a layout. *)
+  val layout_name : 's layout -> string
+
+  (** Get the unique identifier given to a layout. *)
+  val layout_id: 's layout -> 's Polid.t
 end
 
 (** {3} Safe interface *)
