@@ -7,6 +7,15 @@ type 's layout
 
 (** A field of type ['a] within a ['s layout]. *)
 type ('a,'s) field
+  [@@deprecated "Please use Field.t instead"]
+
+(** Get the name of the field (as passed to [field]). *)
+val field_name : ('a, 's) field -> string
+  [@@deprecated "Please use Field.name instead"]
+
+(** Get the type of the field (as passed to [field]). *)
+val field_type : ('a, 's) field -> 'a Type.t
+  [@@deprecated "Please use Field.typ instead"]
 
 (** Create a new layout with the given name. *)
 val declare : string -> 's layout
@@ -15,12 +24,6 @@ val declare : string -> 's layout
 (** Add a field to a layout. This modifies the layout and returns the field. *)
 val field: 's layout -> string -> 'a Type.t -> ('a,'s) field
   [@@deprecated "This function has been moved to Record.Unsafe"]
-
-(** Get the name of the field (as passed to [field]). *)
-val field_name : ('a, 's) field -> string
-
-(** Get the type of the field (as passed to [field]). *)
-val field_type : ('a, 's) field -> 'a Type.t
 
 (** Make the layout unmodifiable. It is necessary before constructing values. *)
 val seal : 's layout -> unit
@@ -53,6 +56,56 @@ val make: 's layout -> 's t
 
 (** Get the layout of a record. *)
 val get_layout : 'a t -> 'a layout
+
+(** Get the [Type.t] representation of a layout. *)
+val layout_type : 'a layout -> 'a t Type.t
+  [@@deprecated "This function has been moved to Record.Util"]
+
+(** Shortcut to build a layout with no fields. *)
+val declare0 : name:string -> 's layout
+  [@@deprecated "This function has been moved in Record.Util"]
+
+(** Shortcut to build a layout with 1 field. *)
+val declare1 : name:string
+            -> f1_name:string
+            -> f1_type:'a Type.t
+            -> ('s layout * ('a, 's) field)
+            [@@deprecated "This function has been moved in Record.Util"]
+
+(** Shortcut to build a layout with 2 fields. *)
+val declare2 : name:string
+            -> f1_name:string
+            -> f1_type:'a1 Type.t
+            -> f2_name:string
+            -> f2_type:'a2 Type.t
+            -> ('s layout * ('a1, 's) field * ('a2, 's) field)
+            [@@deprecated "This function has been moved in Record.Util"]
+
+(** Shortcut to build a layout with 3 fields. *)
+val declare3 : name:string
+            -> f1_name:string
+            -> f1_type:'a1 Type.t
+            -> f2_name:string
+            -> f2_type:'a2 Type.t
+            -> f3_name:string
+            -> f3_type:'a3 Type.t
+            -> ('s layout * ('a1, 's) field * ('a2, 's) field
+                          * ('a3, 's) field)
+            [@@deprecated "This function has been moved in Record.Util"]
+
+(** Shortcut to build a layout with 4 fields. *)
+val declare4 : name:string
+            -> f1_name:string
+            -> f1_type:'a1 Type.t
+            -> f2_name:string
+            -> f2_type:'a2 Type.t
+            -> f3_name:string
+            -> f3_type:'a3 Type.t
+            -> f4_name:string
+            -> f4_type:'a4 Type.t
+            -> ('s layout * ('a1, 's) field * ('a2, 's) field
+                          * ('a3, 's) field * ('a4, 's) field)
+            [@@deprecated "This function has been moved in Record.Util"]
 
 (** Raised by [make] when the corresponding layout has not been sealed. *)
 exception AllocatingUnsealedStruct of string
@@ -91,6 +144,66 @@ module Unsafe : sig
 
   (** Get the unique identifier given to a layout. *)
   val layout_id: 's layout -> 's Polid.t
+end
+
+(** {3} Type converters *)
+module Type : sig
+  (**
+     How to convert a type to and from JSON.
+  *)
+  type 'a t
+
+  (** Declare a new type. *)
+  val make:
+    name: string ->
+    to_yojson: ('a -> Yojson.Safe.json) ->
+    of_yojson: (Yojson.Safe.json -> [ `Ok of 'a | `Error of string ]) ->
+    unit -> 'a t
+
+  (** Declare a new type that marshal/unmarshal to strings. *)
+  val make_string:
+    name: string ->
+    to_string: ('a -> string) ->
+    of_string: (string -> [ `Ok of 'a | `Error of string ]) ->
+    unit -> 'a t
+
+  (** How to represent exceptions. *)
+  val exn: exn t
+
+  (** Raised by [exn.of_json] *)
+  exception UnserializedException of string
+
+  (** How to represent [unit]. *)
+  val unit: unit t
+
+  (** How to represent [string]. *)
+  val string: string t
+
+  (** How to represent [int]. *)
+  val int: int  t
+
+  (** Build a representation of a list. *)
+  val list: 'a t -> 'a list t
+
+  (** Build a representation of a couple.
+      The labels identify the elements, not their types.
+   *)
+  val product_2: string -> 'a t -> string -> 'b t -> ('a * 'b) t
+
+  (** Build a ['b] type which has the same JSON encoding as the ['a] type from
+      conversion functions [read] and [write]. *)
+  val view : name:string -> read:('a -> [`Ok of 'b | `Error of string]) -> write:('b -> 'a) -> 'a t -> 'b t
+end
+
+module Field : sig
+  (** A field of type ['a] within a ['s layout]. *)
+  type ('a,'s) t
+
+  (** Get the name of the field (as passed to [field]). *)
+  val name : ('a, 's) field -> string
+
+  (** Get the type of the field (as passed to [field]). *)
+  val ftype : ('a, 's) field -> 'a Type.t
 end
 
 (** {3} Safe interface *)
@@ -137,52 +250,54 @@ val to_json: 'a t -> Yojson.Basic.json
 (** Convert a JSON value into a given schema. *)
 val of_json: 'a layout -> Yojson.Basic.json -> 'a t
 
-(** Get the [Type.t] representation of a layout. *)
-val layout_type : 'a layout -> 'a t Type.t
+module Util : sig
+  (** Get the [Type.t] representation of a layout. *)
+  val layout_type : 'a layout -> 'a t Type.t
+
+  (** Shortcut to build a layout with no fields. *)
+  val declare0 : name:string -> 's layout
+
+  (** Shortcut to build a layout with 1 field. *)
+  val declare1 : name:string
+              -> f1_name:string
+              -> f1_type:'a Type.t
+              -> ('s layout * ('a, 's) field)
+
+  (** Shortcut to build a layout with 2 fields. *)
+  val declare2 : name:string
+              -> f1_name:string
+              -> f1_type:'a1 Type.t
+              -> f2_name:string
+              -> f2_type:'a2 Type.t
+              -> ('s layout * ('a1, 's) field * ('a2, 's) field)
+
+  (** Shortcut to build a layout with 3 fields. *)
+  val declare3 : name:string
+              -> f1_name:string
+              -> f1_type:'a1 Type.t
+              -> f2_name:string
+              -> f2_type:'a2 Type.t
+              -> f3_name:string
+              -> f3_type:'a3 Type.t
+              -> ('s layout * ('a1, 's) field * ('a2, 's) field
+                            * ('a3, 's) field)
+
+  (** Shortcut to build a layout with 4 fields. *)
+  val declare4 : name:string
+              -> f1_name:string
+              -> f1_type:'a1 Type.t
+              -> f2_name:string
+              -> f2_type:'a2 Type.t
+              -> f3_name:string
+              -> f3_type:'a3 Type.t
+              -> f4_name:string
+              -> f4_type:'a4 Type.t
+              -> ('s layout * ('a1, 's) field * ('a2, 's) field
+                            * ('a3, 's) field * ('a4, 's) field)
+end
 
 (** Equality predicate. *)
 val equal: 'a layout -> 'b layout -> ('a, 'b) Polid.equal
 
 (** Print the JSON representation of a record to a formatter. *)
 val format: Format.formatter -> 'a t -> unit
-
-(** Shortcut to build a layout with no fields. *)
-val declare0 : name:string -> 's layout
-
-(** Shortcut to build a layout with 1 field. *)
-val declare1 : name:string
-            -> f1_name:string
-            -> f1_type:'a Type.t
-            -> ('s layout * ('a, 's) field)
-
-(** Shortcut to build a layout with 2 fields. *)
-val declare2 : name:string
-            -> f1_name:string
-            -> f1_type:'a1 Type.t
-            -> f2_name:string
-            -> f2_type:'a2 Type.t
-            -> ('s layout * ('a1, 's) field * ('a2, 's) field)
-
-(** Shortcut to build a layout with 3 fields. *)
-val declare3 : name:string
-            -> f1_name:string
-            -> f1_type:'a1 Type.t
-            -> f2_name:string
-            -> f2_type:'a2 Type.t
-            -> f3_name:string
-            -> f3_type:'a3 Type.t
-            -> ('s layout * ('a1, 's) field * ('a2, 's) field
-                          * ('a3, 's) field)
-
-(** Shortcut to build a layout with 4 fields. *)
-val declare4 : name:string
-            -> f1_name:string
-            -> f1_type:'a1 Type.t
-            -> f2_name:string
-            -> f2_type:'a2 Type.t
-            -> f3_name:string
-            -> f3_type:'a3 Type.t
-            -> f4_name:string
-            -> f4_type:'a4 Type.t
-            -> ('s layout * ('a1, 's) field * ('a2, 's) field
-                          * ('a3, 's) field * ('a4, 's) field)

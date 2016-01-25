@@ -1,9 +1,16 @@
 ## unreleased
 
+(This release contains breaking changes, indicated by a star)
+
 - Install .cmxs, .cmt, .cmti, .mli files (#10)
 - Move `declare`, `field`, `seal`, `make`, `layout_name` and
   `layout_id` to a `Record.Unsafe` submodule (#9)
 - Require ocaml >= 4.02.0 for deprecation warnings
+* Target `Yojson.Safe` (#15):
+  - a compatibility layer is provided in the `Record` module.
+  - users should migrate to the new functions in the sub modules that are
+    expressed in terms of `Safe`. The `Basic` interface will go away.
+  * The `Safe` variant, already in a submodule, switches to `Safe`.
 
 ## v0.4.0
 

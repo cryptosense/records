@@ -1,3 +1,148 @@
+module Json_safe = struct
+  let (>>=) x f =
+    match x with
+    | `Error e -> `Error e
+    | `Ok y -> f y
+
+  let rec mapM f = function
+    | [] -> `Ok []
+    | x::xs ->
+      f x >>= fun y ->
+      mapM f xs >>= fun ys ->
+      `Ok (y::ys)
+
+  let rec assoc_option key = function
+    | [] -> None
+    | (k, v)::_ when k = key -> Some v
+    | _::l -> assoc_option key l
+
+  let member key = function
+    | `Assoc kvs ->
+      begin
+        match assoc_option key kvs with
+        | Some j -> `Ok j
+        | None -> `Error (Printf.sprintf "Key not found: %s" key)
+      end
+    | _ -> `Error "Not a JSON object"
+
+end
+
+module Basic_type = Type
+module Type = struct
+  type 'a t =
+    { name: string;
+      to_yojson: ('a -> Yojson.Safe.json);
+      of_yojson: (Yojson.Safe.json -> [ `Ok of 'a | `Error of string ]);
+    }
+
+  let make ~name ~to_yojson ~of_yojson () =
+    {
+      name;
+      to_yojson;
+      of_yojson;
+    }
+
+  let make_string ~name ~to_string ~of_string () =
+    let to_yojson x = `String (to_string x) in
+    let of_yojson = function
+      | `String s -> of_string s
+      | _ -> `Error (Printf.sprintf "(while parsing %s) not a string" name)
+    in
+    make ~name ~to_yojson ~of_yojson ()
+
+  exception UnserializedException of string
+
+  let exn =
+    let to_string x = Printexc.to_string x in
+    let of_string x = `Ok (UnserializedException x)
+    in
+    make_string ~name:"exn" ~to_string ~of_string ()
+
+  let product_2 na ta nb tb =
+    let name = ta.name ^ "_" ^ tb.name in
+    let to_yojson (a, b) =
+      `Assoc [ na, ta.to_yojson a; nb, tb.to_yojson b]
+    in
+    let of_yojson json =
+      let open Json_safe in
+      member na json >>= ta.of_yojson >>= fun a ->
+      member nb json >>= tb.of_yojson >>= fun b ->
+      `Ok (a, b)
+    in
+    make
+      ~name
+      ~to_yojson
+      ~of_yojson
+      ()
+
+  let unit =
+    make
+      ~name: "unit"
+      ~to_yojson: (fun () -> `Null)
+      ~of_yojson: (fun _ -> `Ok ())
+      ()
+
+  let list typ =
+    let to_yojson list = `List (List.map typ.to_yojson list) in
+    let of_yojson = function
+      | `List xs -> Json_safe.mapM typ.of_yojson xs
+      | _ -> `Error "Not a JSON list"
+    in
+    make
+      ~name: (typ.name ^ "_list")
+      ~to_yojson
+      ~of_yojson
+      ()
+
+  let string =
+    let of_yojson = function
+      | `String s -> `Ok s
+      | _ -> `Error "Not a JSON string"
+    in
+    make
+      ~name:"string"
+      ~to_yojson: (fun s -> `String s)
+      ~of_yojson
+      ()
+
+  let int =
+    let of_yojson = function
+      | `Int s -> `Ok s
+      | _ -> `Error "Not a JSON int"
+    in
+    make
+      ~name:"int"
+      ~to_yojson: (fun s -> `Int s)
+      ~of_yojson
+      ()
+
+  let view ~name ~read ~write typ =
+    let to_yojson b =
+      typ.to_yojson (write b)
+    in
+    let of_yojson bj =
+      let open Json_safe in
+      (typ.of_yojson bj) >>= read
+    in
+    make ~name ~to_yojson ~of_yojson ()
+end
+
+module Field = struct
+  type ('a, 's) t =
+    {
+      polid: 'a Polid.t;
+      fname: string;
+      ftype: 'a Type.t;
+      foffset: int;
+    }
+
+  let name field =
+    field.fname
+
+  let ftype field =
+    field.ftype
+end
+
 type 's layout =
   {
     name: string;
@@ -6,13 +151,7 @@ type 's layout =
     mutable sealed: bool
   }
 
-and ('a, 's) field =
-  {
-    polid: 'a Polid.t;
-    fname: string;
-    ftype: 'a Type.t;
-    foffset: int;
-  }
+and ('a, 's) field = ('a, 's) Field.t
 
 and _ boxed_field = BoxedField: ('a,'s) field -> 's boxed_field
 
@@ -30,12 +169,87 @@ exception ModifyingSealedStruct of string
 
 exception AllocatingUnsealedStruct of string
 
+let rec basic_of_safe
+  : Yojson.Safe.json -> Yojson.Basic.json
+  = function
+  | `Assoc kvs -> `Assoc (List.map (fun (k, v) -> (k, basic_of_safe v)) kvs)
+  | `Bool b -> `Bool b
+  | `Float f -> `Float f
+  | `Intlit _ -> invalid_arg "Integer is too large to fit in OCaml int"
+  | `Int n -> `Int n
+  | `List js -> `List (List.map basic_of_safe js)
+  | `Null -> `Null
+  | `String s -> `String s
+  | `Tuple _ -> invalid_arg "tuple"
+  | `Variant _ -> invalid_arg "variant"
+
+let rec safe_of_basic : Yojson.Basic.json -> Yojson.Safe.json
+  = function
+  | `Assoc kvs -> `Assoc (List.map (fun (k, v) -> (k, safe_of_basic v)) kvs)
+  | `Bool b -> `Bool b
+  | `Float f -> `Float f
+  | `Int n -> `Int n
+  | `List js -> `List (List.map safe_of_basic js)
+  | `Null -> `Null
+  | `String s -> `String s
+
+let safe_type_of_basic_type btyp =
+  let open Basic_type in
+  let name = btyp.name in
+  let to_yojson x =
+    safe_of_basic (btyp.to_json x)
+  in
+  let of_yojson j =
+    try
+      `Ok (btyp.of_json (basic_of_safe j))
+    with
+    | e -> `Error (Printexc.to_string e)
+  in
+  Type.make
+    ~name
+    ~to_yojson
+    ~of_yojson
+    ()
+
+let basic_type_of_safe_type typ =
+  let open Type in
+  let name = typ.name in
+  let to_json x = basic_of_safe (typ.to_yojson x) in
+  let of_json j =
+    match typ.of_yojson (safe_of_basic j) with
+    | `Ok x -> x
+    | `Error e -> raise (Yojson.Basic.Util.Type_error (e, j))
+  in
+  Basic_type.make
+    ~name
+    ~to_json
+    ~of_json
+    ()
+
 (* The [dummy] is a place holder for t fields. We use it
    instead of boxing each value in an option. If the user accesses a
    field that contains this dummy value, we raise an exception (the
    field was not initialized.). This avoid an extra layer of boxing
    w.r.t. to the solution in which each field is an option. *)
 let dummy = Obj.repr (ref ())
+
+let field_safe (type s) (type a) (layout: s layout) label (ty : a Type.t):
+  (a,s) field =
+  if layout.sealed
+  then raise (ModifyingSealedStruct layout.name);
+
+  let foffset = List.length layout.fields in
+  let field =
+      let open Field in
+      {
+        polid = Polid.fresh ();
+        fname = label;
+        ftype = ty;
+        foffset;
+      }
+  in
+  layout.fields <- BoxedField field :: layout.fields;
+  field
 
 module Unsafe = struct
   let declare (type s) name : s layout =
@@ -54,22 +268,10 @@ module Unsafe = struct
     layout.sealed <- true;
     ()
 
-  let field (type s) (type a) (layout: s layout) label (ty : a Type.t):
+  let field (type s) (type a) (layout: s layout) label (bty : a Basic_type.t):
     (a,s) field =
-    if layout.sealed
-    then raise (ModifyingSealedStruct layout.name);
-
-    let foffset = List.length layout.fields in
-    let field =
-        {
-          polid = Polid.fresh ();
-          fname = label;
-          ftype = ty;
-          foffset;
-        }
-    in
-    layout.fields <- BoxedField field :: layout.fields;
-    field
+    let ty = safe_type_of_basic_type bty in
+    field_safe layout label ty
 
   let make (type s) : s layout -> s t =
     fun (layout: s layout) ->
@@ -101,32 +303,34 @@ exception UndefinedField of string
 let get_layout t = t.layout
 
 let get record field =
+  let open Field in
   let f = Obj.field (Obj.repr record.content) field.foffset in
   if f == dummy
   then raise (UndefinedField (field.fname));
   Obj.obj f
 
 let set record field value =
+  let open Field in
   Obj.set_field (Obj.repr record.content) field.foffset
     (Obj.repr value)
 
 let field_name field =
-  field.fname
+  Field.name field
 
 let field_type field =
-  field.ftype
+  basic_type_of_safe_type (Field.ftype field)
 
 (* There are three ways to handle fields that are not set: raise an
    error, map them to `Null, or skip the field. If some fields might
    not be set, we should use the 2nd or the 3rd. Maybe this kind of
    behavior could be set at field creation time? *)
-let to_json (type s) (s : s t) : Yojson.Basic.json =
+let to_yojson (type s) (s : s t) : Yojson.Safe.json =
   let fields =
     List.map
       (fun (BoxedField f) ->
          let value =
            try
-             (field_type f).Type.to_json (get s f)
+             (Field.ftype f).Type.to_yojson (get s f)
            with UndefinedField _ ->
              `Null
          in
@@ -137,68 +341,112 @@ let to_json (type s) (s : s t) : Yojson.Basic.json =
 
 (* todo: the error handling here is plain wrong. Should do something
    special in the `Null case.  *)
-let of_json (type s) (s: s layout) (json: Yojson.Basic.json) : s t =
+let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : [`Ok of s t | `Error of string]=
+  let open Json_safe in
+  let field_value (BoxedField f) =
+    let open Type in
+    let key = Field.name f in
+    let typ = Field.ftype f in
+    member key json >>= fun m ->
+    typ.of_yojson m >>= fun r ->
+    `Ok (fun s -> set s f r)
+  in
+  Json_safe.mapM field_value s.fields >>= fun kvs ->
   let s = make s in
-  List.iter
-    (fun (BoxedField f) ->
-      let open Type in
-      let typ = field_type f in
-      let m = Yojson.Basic.Util.member (field_name f) json in
-      let r = typ.of_json m in
-      set s f r
-    )
-    s.layout.fields;
-  s
+  List.iter (fun f -> f s) kvs;
+  `Ok s
+
+let to_json r =
+  basic_of_safe (to_yojson r)
+
+let of_json layout j =
+  match of_yojson layout (safe_of_basic j) with
+  | `Ok r -> r
+  | `Error e -> raise (Yojson.Basic.Util.Type_error (e, j))
+
+module Util = struct
+  let layout_type layout =
+    let name = layout_name layout in
+    let of_yojson = of_yojson layout in
+    Type.make
+      ~name
+      ~to_yojson
+      ~of_yojson
+      ()
+
+  let declare0 ~name =
+    let layout = declare name in
+    seal layout;
+    layout
+
+  let declare1 ~name ~f1_name ~f1_type =
+    let layout = declare name in
+    let f1 = field_safe layout f1_name f1_type in
+    seal layout;
+    (layout, f1)
+
+  let declare2 ~name ~f1_name ~f1_type ~f2_name ~f2_type =
+    let layout = declare name in
+    let f1 = field_safe layout f1_name f1_type in
+    let f2 = field_safe layout f2_name f2_type in
+    seal layout;
+    (layout, f1, f2)
+
+  let declare3 ~name ~f1_name ~f1_type ~f2_name ~f2_type
+                            ~f3_name ~f3_type =
+    let layout = declare name in
+    let f1 = field_safe layout f1_name f1_type in
+    let f2 = field_safe layout f2_name f2_type in
+    let f3 = field_safe layout f3_name f3_type in
+    seal layout;
+    (layout, f1, f2, f3)
+
+  let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type
+                            ~f3_name ~f3_type ~f4_name ~f4_type =
+    let layout = declare name in
+    let f1 = field_safe layout f1_name f1_type in
+    let f2 = field_safe layout f2_name f2_type in
+    let f3 = field_safe layout f3_name f3_type in
+    let f4 = field_safe layout f4_name f4_type in
+    seal layout;
+    (layout, f1, f2, f3, f4)
+end
+
+let declare0 ~name =
+  Util.declare0 ~name
+
+let declare1 ~name ~f1_name ~f1_type =
+  Util.declare1
+    ~name
+    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
+
+let declare2 ~name ~f1_name ~f1_type ~f2_name ~f2_type =
+  Util.declare2
+    ~name
+    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
+    ~f2_name ~f2_type:(safe_type_of_basic_type f2_type)
+
+let declare3 ~name ~f1_name ~f1_type ~f2_name ~f2_type ~f3_name ~f3_type =
+  Util.declare3
+    ~name
+    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
+    ~f2_name ~f2_type:(safe_type_of_basic_type f2_type)
+    ~f3_name ~f3_type:(safe_type_of_basic_type f3_type)
+
+let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type ~f3_name ~f3_type
+    ~f4_name ~f4_type =
+  Util.declare4
+    ~name
+    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
+    ~f2_name ~f2_type:(safe_type_of_basic_type f2_type)
+    ~f3_name ~f3_type:(safe_type_of_basic_type f3_type)
+    ~f4_name ~f4_type:(safe_type_of_basic_type f4_type)
 
 let layout_type layout =
-  let name = layout_name layout in
-  let to_json = to_json in
-  let of_json = of_json layout in
-  Type.make
-    ~name
-    ~to_json
-    ~of_json
-    ()
+  basic_type_of_safe_type (Util.layout_type layout)
 
 let format (type s) fmt (s: s t) : unit =
   Format.fprintf fmt "%s" (Yojson.Basic.to_string (to_json s))
-
-let declare0 ~name =
-  let layout = declare name in
-  seal layout;
-  layout
-
-let declare1 ~name ~f1_name ~f1_type =
-  let layout = declare name in
-  let f1 = field layout f1_name f1_type in
-  seal layout;
-  (layout, f1)
-
-let declare2 ~name ~f1_name ~f1_type ~f2_name ~f2_type =
-  let layout = declare name in
-  let f1 = field layout f1_name f1_type in
-  let f2 = field layout f2_name f2_type in
-  seal layout;
-  (layout, f1, f2)
-
-let declare3 ~name ~f1_name ~f1_type ~f2_name ~f2_type
-                          ~f3_name ~f3_type =
-  let layout = declare name in
-  let f1 = field layout f1_name f1_type in
-  let f2 = field layout f2_name f2_type in
-  let f3 = field layout f3_name f3_type in
-  seal layout;
-  (layout, f1, f2, f3)
-
-let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type
-                          ~f3_name ~f3_type ~f4_name ~f4_type =
-  let layout = declare name in
-  let f1 = field layout f1_name f1_type in
-  let f2 = field layout f2_name f2_type in
-  let f3 = field layout f3_name f3_type in
-  let f4 = field layout f4_name f4_type in
-  seal layout;
-  (layout, f1, f2, f3, f4)
 
 module Safe =
 struct
@@ -217,7 +465,7 @@ struct
   struct
     type s
     let layout = declare X.name
-    let field n t = field layout n t
+    let field n t = field_safe layout n t
     let seal () = seal layout
     let layout_name = layout.name
     let layout_id = layout.uid

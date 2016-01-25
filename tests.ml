@@ -18,15 +18,15 @@ let () = Record.Unsafe.seal rlt
 module Safe_layouts =
 struct
   module Rt = (val Record.Safe.declare "r")
-  let x = Rt.field "x" Type.int
+  let x = Rt.field "x" Record.Type.int
   let () = Rt.seal ()
 
   module Rpt = (val Record.Safe.declare "rp")
-  let value_p = Rpt.field "value_pair" (Type.product_2 "fst" Type.int "snd" Type.int)
+  let value_p = Rpt.field "value_pair" (Record.Type.product_2 "fst" Record.Type.int "snd" Record.Type.int)
   let () = Rpt.seal ()
 
   module Rlt = (val Record.Safe.declare "rl")
-  let value_l = Rlt.field "value_list" (Type.list Type.int)
+  let value_l = Rlt.field "value_list" (Record.Type.list Record.Type.int)
   let () = Rlt.seal ()
 end
 
@@ -92,7 +92,7 @@ let make_unsealed ctxt (type r2) =
 
 let safe_make_unsealed ctxt (type r2) =
   let module Rt2 = (val Record.Safe.declare "r2") in
-  let _x2 = Rt2.field "x2" Type.int in
+  let _x2 = Rt2.field "x2" Record.Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
   assert_raises e (fun () ->
     Rt2.make ()
@@ -331,7 +331,7 @@ let layout_type ctxt =
 
 let safe_layout_type ctxt =
   let open Safe_layouts in
-  let rt_typ = Record.layout_type Rt.layout in
+  let rt_typ = Record.Util.layout_type Rt.layout in
   let module La = (val Record.Safe.declare "pair") in
   let fa1 = La.field "f1" rt_typ in
   let fa2 = La.field "f2" rt_typ in
