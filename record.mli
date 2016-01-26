@@ -126,6 +126,10 @@ module Type : sig
   *)
   type 'a t
 
+  val name : 'a t -> string
+  val of_yojson : 'a t -> (Yojson.Safe.json -> [ `Ok of 'a | `Error of string ])
+  val to_yojson : 'a t -> ('a -> Yojson.Safe.json)
+
   (** Declare a new type. *)
   val make:
     name: string ->
@@ -170,7 +174,7 @@ end
 
 module Field : sig
   (** A field of type ['a] within a ['s layout]. *)
-  type ('a,'s) t
+  type ('a,'s) t = ('a, 's) field
 
   (** Get the name of the field (as passed to [field]). *)
   val name : ('a, 's) field -> string
@@ -246,9 +250,17 @@ end
 
 (** Convert a record to JSON. *)
 val to_json: 'a t -> Yojson.Basic.json
+  [@@deprecated "Use to_yojson instead"]
 
 (** Convert a JSON value into a given schema. *)
 val of_json: 'a layout -> Yojson.Basic.json -> 'a t
+  [@@deprecated "Use of_yojson instead"]
+
+(** Convert a record to JSON. *)
+val to_yojson: 'a t -> Yojson.Safe.json
+
+(** Convert a JSON value into a given schema. *)
+val of_yojson: 'a layout -> Yojson.Safe.json -> [`Ok of 'a t|`Error of string]
 
 module Util : sig
   (** Get the [Type.t] representation of a layout. *)

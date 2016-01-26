@@ -35,6 +35,10 @@ module Type = struct
       of_yojson: (Yojson.Safe.json -> [ `Ok of 'a | `Error of string ]);
     }
 
+  let name t = t.name
+  let of_yojson t = t.of_yojson
+  let to_yojson t = t.to_yojson
+
   let make ~name ~to_yojson ~of_yojson () =
     {
       name;
