@@ -119,16 +119,16 @@ let safe_layout_id ctxt =
   assert_bool "fresh returns a different id" (Polid.equal id1 id2 = Polid.Different)
 
 let field_name ctxt =
-  assert_equal "x" (Record.field_name x)
+  assert_equal "x" (Record.Field.name x)
 
 let safe_field_name ctxt =
-  assert_equal "x" (Record.field_name Safe_layouts.x)
+  assert_equal "x" (Record.Field.name Safe_layouts.x)
 
 let field_type ctxt =
-  assert_equal "int" (Record.field_type x).Type.name
+  assert_equal "int" (Record.Type.name (Record.Field.ftype x))
 
 let safe_field_type ctxt =
-  assert_equal "int" (Record.field_type Safe_layouts.x).Type.name
+  assert_equal "int" (Record.Type.name (Record.Field.ftype Safe_layouts.x))
 
 let record_layout ctxt =
   let r = Record.Unsafe.make rt in
@@ -149,43 +149,47 @@ let safe_record_layout ctxt =
       Rt.layout_id
     )
 
+let force = function
+  | `Ok x -> x
+  | `Error _ -> assert false
+
 let of_json ctxt =
   let j = `Assoc [("x", `Int 2)] in
-  let r = Record.of_json rt j in
+  let r = force @@ Record.of_yojson rt j in
   assert_equal 2 (Record.get r x)
 
 let safe_of_json ctxt =
   let j = `Assoc [("x", `Int 2)] in
-  let r = Record.of_json Safe_layouts.Rt.layout j in
+  let r = force @@ Record.of_yojson Safe_layouts.Rt.layout j in
   assert_equal 2 (Record.get r Safe_layouts.x)
 
 let to_json ctxt =
   let r = Record.Unsafe.make rt in
   Record.set r x 2;
   let expected = `Assoc [("x", `Int 2)] in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer expected (Record.to_json r)
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer expected (Record.to_yojson r)
 
 let safe_to_json ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   Record.set r x 2;
   let expected = `Assoc [("x", `Int 2)] in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer expected (Record.to_json r)
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer expected (Record.to_yojson r)
 
 let to_json_null ctxt =
   let r = Record.Unsafe.make rt in
   let expected = `Assoc [("x", `Null)] in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer expected (Record.to_json r)
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer expected (Record.to_yojson r)
 
 let safe_to_json_null ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   let expected = `Assoc [("x", `Null)] in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer expected (Record.to_json r)
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer expected (Record.to_yojson r)
 
 let json_product ctxt  =
   let r = Record.Unsafe.make rpt in
@@ -200,9 +204,9 @@ let json_product ctxt  =
         )
       ]
   in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer json (Record.to_json r);
-  let recovered = Record.of_json rpt json in
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer json (Record.to_yojson r);
+  let recovered = force @@ Record.of_yojson rpt json in
   assert_equal (3, 14) (Record.get recovered value_p)
 
 let safe_json_product ctxt  =
@@ -219,9 +223,9 @@ let safe_json_product ctxt  =
         )
       ]
   in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer json (Record.to_json r);
-  let recovered = Record.of_json Rpt.layout json in
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer json (Record.to_yojson r);
+  let recovered = force @@ Record.of_yojson Rpt.layout json in
   assert_equal (3, 14) (Record.get recovered value_p)
 
 let json_list ctxt =
@@ -238,9 +242,9 @@ let json_list ctxt =
         )
       ]
   in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer json (Record.to_json r);
-  let recovered = Record.of_json rlt json in
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer json (Record.to_yojson r);
+  let recovered = force @@ Record.of_yojson rlt json in
   assert_equal [3; 14; 15] (Record.get recovered value_l)
 
 let safe_json_list ctxt =
@@ -258,60 +262,60 @@ let safe_json_list ctxt =
         )
       ]
   in
-  let printer = Yojson.Basic.pretty_to_string in
-  assert_equal ~printer json (Record.to_json r);
-  let recovered = Record.of_json Rlt.layout json in
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer json (Record.to_yojson r);
+  let recovered = force @@ Record.of_yojson Rlt.layout json in
   assert_equal [3; 14; 15] (Record.get recovered value_l)
 
 let declare0 ctxt =
-  let l = Record.declare0 ~name:"r" in
+  let l = Record.Util.declare0 ~name:"r" in
   assert_equal "r" (Record.Unsafe.layout_name l)
 
 let declare1 ctxt =
-  let (l, f) = Record.declare1 ~name:"r" ~f1_name:"x" ~f1_type:Type.int in
+  let (l, f) = Record.Util.declare1 ~name:"r" ~f1_name:"x" ~f1_type:Record.Type.int in
   assert_equal "r" (Record.Unsafe.layout_name l);
-  assert_equal "x" (Record.field_name f)
+  assert_equal "x" (Record.Field.name f)
 
 let declare2 ctxt =
   let (l, f1, f2) =
-    Record.declare2 ~name:"r"
-      ~f1_name:"f1" ~f1_type:Type.int
-      ~f2_name:"f2" ~f2_type:Type.int
+    Record.Util.declare2 ~name:"r"
+      ~f1_name:"f1" ~f1_type:Record.Type.int
+      ~f2_name:"f2" ~f2_type:Record.Type.int
   in
   assert_equal "r" (Record.Unsafe.layout_name l);
-  assert_equal "f1" (Record.field_name f1);
-  assert_equal "f2" (Record.field_name f2)
+  assert_equal "f1" (Record.Field.name f1);
+  assert_equal "f2" (Record.Field.name f2)
 
 let declare3 ctxt =
   let (l, f1, f2, f3) =
-    Record.declare3 ~name:"r"
-      ~f1_name:"f1" ~f1_type:Type.int
-      ~f2_name:"f2" ~f2_type:Type.int
-      ~f3_name:"f3" ~f3_type:Type.int
+    Record.Util.declare3 ~name:"r"
+      ~f1_name:"f1" ~f1_type:Record.Type.int
+      ~f2_name:"f2" ~f2_type:Record.Type.int
+      ~f3_name:"f3" ~f3_type:Record.Type.int
   in
   assert_equal "r" (Record.Unsafe.layout_name l);
-  assert_equal "f1" (Record.field_name f1);
-  assert_equal "f2" (Record.field_name f2);
-  assert_equal "f3" (Record.field_name f3)
+  assert_equal "f1" (Record.Field.name f1);
+  assert_equal "f2" (Record.Field.name f2);
+  assert_equal "f3" (Record.Field.name f3)
 
 let declare4 ctxt =
   let (l, f1, f2, f3, f4) =
-    Record.declare4 ~name:"r"
-      ~f1_name:"f1" ~f1_type:Type.int
-      ~f2_name:"f2" ~f2_type:Type.int
-      ~f3_name:"f3" ~f3_type:Type.int
-      ~f4_name:"f4" ~f4_type:Type.int
+    Record.Util.declare4 ~name:"r"
+      ~f1_name:"f1" ~f1_type:Record.Type.int
+      ~f2_name:"f2" ~f2_type:Record.Type.int
+      ~f3_name:"f3" ~f3_type:Record.Type.int
+      ~f4_name:"f4" ~f4_type:Record.Type.int
   in
   assert_equal "r" (Record.Unsafe.layout_name l);
-  assert_equal "f1" (Record.field_name f1);
-  assert_equal "f2" (Record.field_name f2);
-  assert_equal "f3" (Record.field_name f3);
-  assert_equal "f4" (Record.field_name f4)
+  assert_equal "f1" (Record.Field.name f1);
+  assert_equal "f2" (Record.Field.name f2);
+  assert_equal "f3" (Record.Field.name f3);
+  assert_equal "f4" (Record.Field.name f4)
 
 let layout_type ctxt =
-  let rt_typ = Record.layout_type rt in
+  let rt_typ = Record.Util.layout_type rt in
   let (la, fa1, fa2) =
-    Record.declare2 ~name:"pair"
+    Record.Util.declare2 ~name:"pair"
       ~f1_name:"f1" ~f1_type:rt_typ
       ~f2_name:"f2" ~f2_type:rt_typ
   in
@@ -320,14 +324,14 @@ let layout_type ctxt =
   let rp = Record.Unsafe.make la in
   Record.set rp fa1 r;
   Record.set rp fa2 r;
-  let printer = Yojson.Basic.pretty_to_string in
+  let printer = Yojson.Safe.pretty_to_string in
   let expected =
     `Assoc
       [ ("f1", `Assoc [("x", `Int 3)])
       ; ("f2", `Assoc [("x", `Int 3)])
       ]
   in
-  assert_equal ~ctxt ~printer expected (Record.to_json rp)
+  assert_equal ~ctxt ~printer expected (Record.to_yojson rp)
 
 let safe_layout_type ctxt =
   let open Safe_layouts in
@@ -341,28 +345,28 @@ let safe_layout_type ctxt =
   let rp = La.make () in
   Record.set rp fa1 r;
   Record.set rp fa2 r;
-  let printer = Yojson.Basic.pretty_to_string in
+  let printer = Yojson.Safe.pretty_to_string in
   let expected =
     `Assoc
       [ ("f1", `Assoc [("x", `Int 3)])
       ; ("f2", `Assoc [("x", `Int 3)])
       ]
   in
-  assert_equal ~ctxt ~printer expected (Record.to_json rp)
+  assert_equal ~ctxt ~printer expected (Record.to_yojson rp)
 
 let view ctxt =
-  let open Type in
   let int_array =
+    let open Record.Type in
     view
       ~name:"int_array"
-      ~read:Array.of_list
+      ~read:(fun x -> `Ok (Array.of_list x))
       ~write:Array.to_list
       (list int)
   in
   let j = `List [`Int 3 ; `Int 14 ; `Int 15] in
   let a = [|3 ; 14 ; 15|] in
-  assert_equal ~ctxt a (int_array.of_json j);
-  assert_equal ~ctxt j (int_array.to_json a)
+  assert_equal ~ctxt (`Ok a) (Record.Type.of_yojson int_array j);
+  assert_equal ~ctxt j (Record.Type.to_yojson int_array a)
 
 let suite =
   "Records" >:::
