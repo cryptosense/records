@@ -107,16 +107,16 @@ let safe_layout_name ctxt =
 let layout_id ctxt =
   let id1 = Record.Unsafe.layout_id rt in
   let id2 = Record.Unsafe.layout_id rt in
-  let id3 = Polid.fresh () in
-  assert_bool "layout_id is pure" (Polid.equal id1 id2 = Polid.Equal);
-  assert_equal ~msg:"layout_id is pure (int)" (Polid.to_int id1) (Polid.to_int id2);
-  assert_bool "fresh returns a different id" (Polid.equal id1 id3 = Polid.Different)
+  let id3 = Record.Polid.fresh () in
+  assert_bool "layout_id is pure" (Record.Polid.equal id1 id2 = Record.Polid.Equal);
+  assert_equal ~msg:"layout_id is pure (int)" (Record.Polid.to_int id1) (Record.Polid.to_int id2);
+  assert_bool "fresh returns a different id" (Record.Polid.equal id1 id3 = Record.Polid.Different)
 
 let safe_layout_id ctxt =
   let open Safe_layouts in
   let id1 = Rt.layout_id in
-  let id2 = Polid.fresh () in
-  assert_bool "fresh returns a different id" (Polid.equal id1 id2 = Polid.Different)
+  let id2 = Record.Polid.fresh () in
+  assert_bool "fresh returns a different id" (Record.Polid.equal id1 id2 = Record.Polid.Different)
 
 let field_name ctxt =
   assert_equal "x" (Record.Field.name x)
@@ -134,7 +134,7 @@ let record_layout ctxt =
   let r = Record.Unsafe.make rt in
   let l = Record.get_layout r in
   assert_bool "layout is the same"
-    (Polid.is_equal
+    (Record.Polid.is_equal
       (Record.Unsafe.layout_id l)
       (Record.Unsafe.layout_id rt)
     )
@@ -144,7 +144,7 @@ let safe_record_layout ctxt =
   let r = Rt.make () in
   let l = Record.get_layout r in
   assert_bool "layout is the same"
-    (Polid.is_equal
+    (Record.Polid.is_equal
       (Record.Unsafe.layout_id l)
       Rt.layout_id
     )
