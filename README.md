@@ -19,9 +19,9 @@ Second, define the fields. They have the type `(int, Point.s) field`
 (`Point.s` is a phantom type that guarantees type safety).
 
 ```ocaml
-let x = Point.field "x" Type.int
-let y = Point.field "y" Type.int
-let z = Point.field "z" Type.int
+let x = Point.field "x" Record.Type.int
+let y = Point.field "y" Record.Type.int
+let z = Point.field "z" Record.Type.int
 ```
 
 Third, "seal" this record structure. This prevents it from being further modified.
