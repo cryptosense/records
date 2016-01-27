@@ -5,6 +5,7 @@
 - Install .cmxs, .cmt, .cmti, .mli files (#10)
 - Move `declare`, `field`, `seal`, `make`, `layout_name` and
   `layout_id` to a `Record.Unsafe` submodule (#9)
+- Move `Polid` to `Record.Polid`
 - Require ocaml >= 4.02.0 for deprecation warnings
 * Target `Yojson.Safe` (#15):
   - a compatibility layer is provided in the `Record` module.

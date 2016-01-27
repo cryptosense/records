@@ -478,3 +478,5 @@ struct
   let declare : string -> (module LAYOUT) =
     fun name -> (module (Declare (struct let name = name end)))
 end
+
+module Polid = Polid

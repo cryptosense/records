@@ -183,6 +183,30 @@ module Field : sig
   val ftype : ('a, 's) field -> 'a Type.t
 end
 
+module Polid : sig
+  (** The type of identifiers associated to type ['a]. *)
+  type 'a t = 'a Polid.t
+
+  (** Make a new, fresh identifier.
+      This is the only way to obtain a value of type [t]. *)
+  val fresh: unit -> 'a t
+
+  (** Type constraint which is conditioned on identifier equality. *)
+  type ('a, 'b) equal = ('a, 'b) Polid.equal =
+    | Equal: ('a, 'a) equal
+    | Different: ('a, 'b) equal
+
+  (** Equality predicate. *)
+  val equal: 'a t -> 'b t -> ('a, 'b) equal
+
+  (** Convert an identifier to an integer.
+      The integer is guaranteed to be unique for each call to {!fresh}. *)
+  val to_int: 'a t -> int
+
+  (** [equal] projected to a plain [bool]. *)
+  val is_equal: 'a t -> 'b t -> bool
+end
+
 (** {3} Unsafe interface *)
 module Unsafe : sig
   (** The [Unsafe.declare] function returns a ['s layout], which is only safe
