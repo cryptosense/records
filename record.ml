@@ -16,53 +16,17 @@ and ('a, 's) field =
 
 and _ boxed_field = BoxedField: ('a,'s) field -> 's boxed_field
 
-let equal (type a) (type b) (a: a layout) (b: b layout): (a, b) Polid.equal =
-  Polid.equal a.uid b.uid
-
-let declare (type s) name : s layout =
-  {
-    name;
-    uid = Polid.fresh ();
-    fields = [];
-    sealed = false;
-  }
-
-let layout_name layout = layout.name
-let layout_id t = t.uid
-
-exception ModifyingSealedStruct of string
-
-let seal (type s) (layout: s layout) : unit =
-  if layout.sealed
-  then raise (ModifyingSealedStruct layout.name);
-
-  layout.fields <- List.rev layout.fields;
-  layout.sealed <- true;
-  ()
-
-let field (type s) (type a) (layout: s layout) label (ty : a Type.t):
-  (a,s) field =
-  if layout.sealed
-  then raise (ModifyingSealedStruct layout.name);
-
-  let foffset = List.length layout.fields in
-  let field =
-      {
-        polid = Polid.fresh ();
-        fname = label;
-        ftype = ty;
-        foffset;
-      }
-  in
-  layout.fields <- BoxedField field :: layout.fields;
-  field
-
 type 'a t =
   {
     layout: 'a layout;
     content: 'a content;
   }
 and 'a content
+
+let equal (type a) (type b) (a: a layout) (b: b layout): (a, b) Polid.equal =
+  Polid.equal a.uid b.uid
+
+exception ModifyingSealedStruct of string
 
 exception AllocatingUnsealedStruct of string
 
@@ -73,18 +37,64 @@ exception AllocatingUnsealedStruct of string
    w.r.t. to the solution in which each field is an option. *)
 let dummy = Obj.repr (ref ())
 
-let make (type s) : s layout -> s t =
-  fun (layout: s layout) ->
-    if not layout.sealed
-    then raise (AllocatingUnsealedStruct layout.name);
+module Unsafe = struct
+  let declare (type s) name : s layout =
+    {
+      name;
+      uid = Polid.fresh ();
+      fields = [];
+      sealed = false;
+    }
 
-    let size = List.length layout.fields in
-    let obj = Obj.new_block 0 size in
-    for i = 0 to size - 1 do
-      Obj.set_field obj i dummy;
-    done;
-    {layout;
-     content = Obj.obj obj}
+  let seal (type s) (layout: s layout) : unit =
+    if layout.sealed
+    then raise (ModifyingSealedStruct layout.name);
+
+    layout.fields <- List.rev layout.fields;
+    layout.sealed <- true;
+    ()
+
+  let field (type s) (type a) (layout: s layout) label (ty : a Type.t):
+    (a,s) field =
+    if layout.sealed
+    then raise (ModifyingSealedStruct layout.name);
+
+    let foffset = List.length layout.fields in
+    let field =
+        {
+          polid = Polid.fresh ();
+          fname = label;
+          ftype = ty;
+          foffset;
+        }
+    in
+    layout.fields <- BoxedField field :: layout.fields;
+    field
+
+  let make (type s) : s layout -> s t =
+    fun (layout: s layout) ->
+      if not layout.sealed
+      then raise (AllocatingUnsealedStruct layout.name);
+
+      let size = List.length layout.fields in
+      let obj = Obj.new_block 0 size in
+      for i = 0 to size - 1 do
+        Obj.set_field obj i dummy;
+      done;
+      {layout;
+       content = Obj.obj obj}
+
+  let layout_name layout = layout.name
+
+  let layout_id t = t.uid
+end
+
+let declare = Unsafe.declare
+let seal = Unsafe.seal
+let field = Unsafe.field
+let make = Unsafe.make
+let layout_name = Unsafe.layout_name
+let layout_id = Unsafe.layout_id
 
 exception UndefinedField of string
 

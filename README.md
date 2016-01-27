@@ -9,36 +9,35 @@ This library enables you to define and manipulate dynamic records in OCaml.
 
 Let us define a "point" record with three integer fields: x, y and z.
 
-First, declare a new record layout. It uses a phantom type so that `point` has
-type `point layout`.
+First, declare a new record layout.
 
 ```ocaml
-type point
-let point : point Record.layout = Record.declare "point"
+module Point = (val Record.Safe.declare "point")
 ```
 
-Second, define the fields. They have the type `(int, point) field`.
+Second, define the fields. They have the type `(int, Point.s) field`
+(`Point.s` is a phantom type that guarantees type safety).
 
 ```ocaml
-let x = Record.field point "x" Type.int
-let y = Record.field point "y" Type.int
-let z = Record.field point "z" Type.int
+let x = Point.field "x" Type.int
+let y = Point.field "y" Type.int
+let z = Point.field "z" Type.int
 ```
 
 Third, "seal" this record structure. This prevents it from being further modified.
 Structures must be sealed before they can be used.
 
 ```ocaml
-let () = Record.seal point
+let () = Point.seal ()
 ```
 
-At this point, you have a working record structure. The next step is to create actual
-records.  They have the type `point Record.t` and are created using `Record.make`.
-Initially their fields have no value.
+At this point, you have a working record structure. The next step is to create
+actual records. They have the type `Point.s Record.t` and are created using
+`Point.make`. Initially their fields have no value.
 
 ```ocaml
 let _ =
-  let p = Record.make point in
+  let p = Point.make () in
   Record.set p x 3;
   Record.set p y 4;
   Record.set p z 5;
