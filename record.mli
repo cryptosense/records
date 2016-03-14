@@ -99,14 +99,14 @@ exception UndefinedField of string
 
 module Polid : sig
   (** The type of identifiers associated to type ['a]. *)
-  type 'a t = 'a Polid.t
+  type 'a t
 
   (** Make a new, fresh identifier.
       This is the only way to obtain a value of type [t]. *)
   val fresh: unit -> 'a t
 
   (** Type constraint which is conditioned on identifier equality. *)
-  type ('a, 'b) equal = ('a, 'b) Polid.equal =
+  type ('a, 'b) equal =
     | Equal: ('a, 'a) equal
     | Different: ('a, 'b) equal
 
