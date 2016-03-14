@@ -1,5 +1,10 @@
 ## unreleased
 
+(This release contains breaking changes, indicated by a star)
+
+- Remove deprecated functions
+* `Record.format` now outputs a string based on `Yojson.Safe`.
+
 ## v0.5.0
 
 *2016-01-27*
