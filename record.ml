@@ -196,30 +196,6 @@ exception ModifyingSealedStruct of string
 
 exception AllocatingUnsealedStruct of string
 
-let rec basic_of_safe
-  : Yojson.Safe.json -> Yojson.Basic.json
-  = function
-  | `Assoc kvs -> `Assoc (List.map (fun (k, v) -> (k, basic_of_safe v)) kvs)
-  | `Bool b -> `Bool b
-  | `Float f -> `Float f
-  | `Intlit _ -> invalid_arg "Integer is too large to fit in OCaml int"
-  | `Int n -> `Int n
-  | `List js -> `List (List.map basic_of_safe js)
-  | `Null -> `Null
-  | `String s -> `String s
-  | `Tuple _ -> invalid_arg "tuple"
-  | `Variant _ -> invalid_arg "variant"
-
-let rec safe_of_basic : Yojson.Basic.json -> Yojson.Safe.json
-  = function
-  | `Assoc kvs -> `Assoc (List.map (fun (k, v) -> (k, safe_of_basic v)) kvs)
-  | `Bool b -> `Bool b
-  | `Float f -> `Float f
-  | `Int n -> `Int n
-  | `List js -> `List (List.map safe_of_basic js)
-  | `Null -> `Null
-  | `String s -> `String s
-
 (* The [dummy] is a place holder for t fields. We use it
    instead of boxing each value in an option. If the user accesses a
    field that contains this dummy value, we raise an exception (the
