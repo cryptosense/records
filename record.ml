@@ -27,7 +27,6 @@ module Json_safe = struct
 
 end
 
-module Basic_type = Type
 module Type = struct
   type 'a t =
     { name: string;
@@ -131,6 +130,32 @@ module Type = struct
     make ~name ~to_yojson ~of_yojson ()
 end
 
+module Polid = struct
+  type 'a t = int
+
+  let fresh =
+    let counter = ref (-1) in
+    fun () ->
+      incr counter;
+      !counter
+
+  type (_, _) equal =
+    | Equal: ('a, 'a) equal
+    | Different: ('a, 'b) equal
+
+  let equal (type a) (type b) (a: a t) (b: b t): (a, b) equal =
+    if a = b then
+      (Obj.magic (Equal: (a, a) equal): (a, b) equal)
+    else
+      Different
+
+  let to_int x =
+    x
+
+  let is_equal (type a) (type b) (a: a t) (b: b t): bool =
+    a = b
+end
+
 module Field = struct
   type ('a, 's) t =
     {
@@ -155,9 +180,7 @@ type 's layout =
     mutable sealed: bool
   }
 
-and ('a, 's) field = ('a, 's) Field.t
-
-and _ boxed_field = BoxedField: ('a,'s) field -> 's boxed_field
+and _ boxed_field = BoxedField: ('a,'s) Field.t -> 's boxed_field
 
 type 'a t =
   {
@@ -197,39 +220,6 @@ let rec safe_of_basic : Yojson.Basic.json -> Yojson.Safe.json
   | `Null -> `Null
   | `String s -> `String s
 
-let safe_type_of_basic_type btyp =
-  let open Basic_type in
-  let name = btyp.name in
-  let to_yojson x =
-    safe_of_basic (btyp.to_json x)
-  in
-  let of_yojson j =
-    try
-      `Ok (btyp.of_json (basic_of_safe j))
-    with
-    | e -> `Error (Printexc.to_string e)
-  in
-  Type.make
-    ~name
-    ~to_yojson
-    ~of_yojson
-    ()
-
-let basic_type_of_safe_type typ =
-  let open Type in
-  let name = typ.name in
-  let to_json x = basic_of_safe (typ.to_yojson x) in
-  let of_json j =
-    match typ.of_yojson (safe_of_basic j) with
-    | `Ok x -> x
-    | `Error e -> raise (Yojson.Basic.Util.Type_error (e, j))
-  in
-  Basic_type.make
-    ~name
-    ~to_json
-    ~of_json
-    ()
-
 (* The [dummy] is a place holder for t fields. We use it
    instead of boxing each value in an option. If the user accesses a
    field that contains this dummy value, we raise an exception (the
@@ -238,7 +228,7 @@ let basic_type_of_safe_type typ =
 let dummy = Obj.repr (ref ())
 
 let field_safe (type s) (type a) (layout: s layout) label (ty : a Type.t):
-  (a,s) field =
+  (a,s) Field.t =
   if layout.sealed
   then raise (ModifyingSealedStruct layout.name);
 
@@ -273,7 +263,7 @@ module Unsafe = struct
     ()
 
   let field (type s) (type a) (layout: s layout) label (ty : a Type.t):
-    (a,s) field =
+    (a,s) Field.t =
     field_safe layout label ty
 
   let make (type s) : s layout -> s t =
@@ -294,13 +284,6 @@ module Unsafe = struct
   let layout_id t = t.uid
 end
 
-let declare = Unsafe.declare
-let seal = Unsafe.seal
-let field l k t = Unsafe.field l k (safe_type_of_basic_type t)
-let make = Unsafe.make
-let layout_name = Unsafe.layout_name
-let layout_id = Unsafe.layout_id
-
 exception UndefinedField of string
 
 let get_layout t = t.layout
@@ -317,12 +300,6 @@ let set record field value =
   Obj.set_field (Obj.repr record.content) field.foffset
     (Obj.repr value)
 
-let field_name field =
-  Field.name field
-
-let field_type field =
-  basic_type_of_safe_type (Field.ftype field)
-
 (* There are three ways to handle fields that are not set: raise an
    error, map them to `Null, or skip the field. If some fields might
    not be set, we should use the 2nd or the 3rd. Maybe this kind of
@@ -337,7 +314,7 @@ let to_yojson (type s) (s : s t) : Yojson.Safe.json =
            with UndefinedField _ ->
              `Null
          in
-         field_name f, value)
+         Field.name f, value)
       s.layout.fields
   in
   `Assoc fields
@@ -355,21 +332,13 @@ let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : [`Ok of s t | `E
     `Ok (fun s -> set s f r)
   in
   Json_safe.mapM field_value s.fields >>= fun kvs ->
-  let s = make s in
+  let s = Unsafe.make s in
   List.iter (fun f -> f s) kvs;
   `Ok s
 
-let to_json r =
-  basic_of_safe (to_yojson r)
-
-let of_json layout j =
-  match of_yojson layout (safe_of_basic j) with
-  | `Ok r -> r
-  | `Error e -> raise (Yojson.Basic.Util.Type_error (e, j))
-
 module Util = struct
   let layout_type layout =
-    let name = layout_name layout in
+    let name = Unsafe.layout_name layout in
     let of_yojson = of_yojson layout in
     Type.make
       ~name
@@ -378,78 +347,45 @@ module Util = struct
       ()
 
   let declare0 ~name =
-    let layout = declare name in
-    seal layout;
+    let layout = Unsafe.declare name in
+    Unsafe.seal layout;
     layout
 
   let declare1 ~name ~f1_name ~f1_type =
-    let layout = declare name in
+    let layout = Unsafe.declare name in
     let f1 = field_safe layout f1_name f1_type in
-    seal layout;
+    Unsafe.seal layout;
     (layout, f1)
 
   let declare2 ~name ~f1_name ~f1_type ~f2_name ~f2_type =
-    let layout = declare name in
+    let layout = Unsafe.declare name in
     let f1 = field_safe layout f1_name f1_type in
     let f2 = field_safe layout f2_name f2_type in
-    seal layout;
+    Unsafe.seal layout;
     (layout, f1, f2)
 
   let declare3 ~name ~f1_name ~f1_type ~f2_name ~f2_type
                             ~f3_name ~f3_type =
-    let layout = declare name in
+    let layout = Unsafe.declare name in
     let f1 = field_safe layout f1_name f1_type in
     let f2 = field_safe layout f2_name f2_type in
     let f3 = field_safe layout f3_name f3_type in
-    seal layout;
+    Unsafe.seal layout;
     (layout, f1, f2, f3)
 
   let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type
                             ~f3_name ~f3_type ~f4_name ~f4_type =
-    let layout = declare name in
+    let layout = Unsafe.declare name in
     let f1 = field_safe layout f1_name f1_type in
     let f2 = field_safe layout f2_name f2_type in
     let f3 = field_safe layout f3_name f3_type in
     let f4 = field_safe layout f4_name f4_type in
-    seal layout;
+    Unsafe.seal layout;
     (layout, f1, f2, f3, f4)
 end
 
-let declare0 ~name =
-  Util.declare0 ~name
-
-let declare1 ~name ~f1_name ~f1_type =
-  Util.declare1
-    ~name
-    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
-
-let declare2 ~name ~f1_name ~f1_type ~f2_name ~f2_type =
-  Util.declare2
-    ~name
-    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
-    ~f2_name ~f2_type:(safe_type_of_basic_type f2_type)
-
-let declare3 ~name ~f1_name ~f1_type ~f2_name ~f2_type ~f3_name ~f3_type =
-  Util.declare3
-    ~name
-    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
-    ~f2_name ~f2_type:(safe_type_of_basic_type f2_type)
-    ~f3_name ~f3_type:(safe_type_of_basic_type f3_type)
-
-let declare4 ~name ~f1_name ~f1_type ~f2_name ~f2_type ~f3_name ~f3_type
-    ~f4_name ~f4_type =
-  Util.declare4
-    ~name
-    ~f1_name ~f1_type:(safe_type_of_basic_type f1_type)
-    ~f2_name ~f2_type:(safe_type_of_basic_type f2_type)
-    ~f3_name ~f3_type:(safe_type_of_basic_type f3_type)
-    ~f4_name ~f4_type:(safe_type_of_basic_type f4_type)
-
-let layout_type layout =
-  basic_type_of_safe_type (Util.layout_type layout)
-
 let format (type s) fmt (s: s t) : unit =
-  Format.fprintf fmt "%s" (Yojson.Basic.to_string (to_json s))
+  Format.fprintf fmt "%s" (Yojson.Safe.to_string (to_yojson s))
 
 module Safe =
 struct
@@ -457,7 +393,7 @@ struct
   sig
     type s
     val layout : s layout
-    val field : string -> 'a Type.t -> ('a, s) field
+    val field : string -> 'a Type.t -> ('a, s) Field.t
     val seal : unit -> unit
     val layout_name : string
     val layout_id : s Polid.t
@@ -467,16 +403,14 @@ struct
   module Declare(X: sig val name : string end) : LAYOUT =
   struct
     type s
-    let layout = declare X.name
+    let layout = Unsafe.declare X.name
     let field n t = field_safe layout n t
-    let seal () = seal layout
+    let seal () = Unsafe.seal layout
     let layout_name = layout.name
     let layout_id = layout.uid
-    let make () = make layout
+    let make () = Unsafe.make layout
   end
 
   let declare : string -> (module LAYOUT) =
     fun name -> (module (Declare (struct let name = name end)))
 end
-
-module Polid = Polid

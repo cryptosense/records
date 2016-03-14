@@ -1,6 +1,6 @@
 .PHONY: all byte opt install uninstall clean check cov
 PACKAGE=records
-MLI=record type polid
+MLI=record
 OBJ=$(addprefix _build/, $(addsuffix .cmi, $(MLI)) $(PACKAGE).cma)
 NATIVE_OBJ=$(addprefix _build/, $(PACKAGE).cmxa $(PACKAGE).a $(PACKAGE).cmxs)
 
