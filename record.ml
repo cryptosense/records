@@ -1,15 +1,17 @@
+open Result
+
 module Json_safe = struct
   let (>>=) x f =
     match x with
-    | `Error e -> `Error e
-    | `Ok y -> f y
+    | Error e -> Error e
+    | Ok y -> f y
 
   let rec mapM f = function
-    | [] -> `Ok []
+    | [] -> Ok []
     | x::xs ->
       f x >>= fun y ->
       mapM f xs >>= fun ys ->
-      `Ok (y::ys)
+      Ok (y::ys)
 
   let rec assoc_option key = function
     | [] -> None
@@ -20,10 +22,10 @@ module Json_safe = struct
     | `Assoc kvs ->
       begin
         match assoc_option key kvs with
-        | Some j -> `Ok j
-        | None -> `Error (Printf.sprintf "Key not found: %s" key)
+        | Some j -> Ok j
+        | None -> Error (Printf.sprintf "Key not found: %s" key)
       end
-    | _ -> `Error "Not a JSON object"
+    | _ -> Error "Not a JSON object"
 
 end
 
@@ -31,7 +33,7 @@ module Type = struct
   type 'a t =
     { name: string;
       to_yojson: ('a -> Yojson.Safe.json);
-      of_yojson: (Yojson.Safe.json -> [ `Ok of 'a | `Error of string ]);
+      of_yojson: (Yojson.Safe.json -> ('a, string) result);
     }
 
   let name t = t.name
@@ -49,7 +51,7 @@ module Type = struct
     let to_yojson x = `String (to_string x) in
     let of_yojson = function
       | `String s -> of_string s
-      | _ -> `Error (Printf.sprintf "(while parsing %s) not a string" name)
+      | _ -> Error (Printf.sprintf "(while parsing %s) not a string" name)
     in
     make ~name ~to_yojson ~of_yojson ()
 
@@ -57,7 +59,7 @@ module Type = struct
 
   let exn =
     let to_string x = Printexc.to_string x in
-    let of_string x = `Ok (UnserializedException x)
+    let of_string x = Ok (UnserializedException x)
     in
     make_string ~name:"exn" ~to_string ~of_string ()
 
@@ -70,7 +72,7 @@ module Type = struct
       let open Json_safe in
       member na json >>= ta.of_yojson >>= fun a ->
       member nb json >>= tb.of_yojson >>= fun b ->
-      `Ok (a, b)
+      Ok (a, b)
     in
     make
       ~name
@@ -82,14 +84,14 @@ module Type = struct
     make
       ~name: "unit"
       ~to_yojson: (fun () -> `Null)
-      ~of_yojson: (fun _ -> `Ok ())
+      ~of_yojson: (fun _ -> Ok ())
       ()
 
   let list typ =
     let to_yojson list = `List (List.map typ.to_yojson list) in
     let of_yojson = function
       | `List xs -> Json_safe.mapM typ.of_yojson xs
-      | _ -> `Error "Not a JSON list"
+      | _ -> Error "Not a JSON list"
     in
     make
       ~name: (typ.name ^ "_list")
@@ -99,8 +101,8 @@ module Type = struct
 
   let string =
     let of_yojson = function
-      | `String s -> `Ok s
-      | _ -> `Error "Not a JSON string"
+      | `String s -> Ok s
+      | _ -> Error "Not a JSON string"
     in
     make
       ~name:"string"
@@ -110,8 +112,8 @@ module Type = struct
 
   let int =
     let of_yojson = function
-      | `Int s -> `Ok s
-      | _ -> `Error "Not a JSON int"
+      | `Int s -> Ok s
+      | _ -> Error "Not a JSON int"
     in
     make
       ~name:"int"
@@ -297,7 +299,7 @@ let to_yojson (type s) (s : s t) : Yojson.Safe.json =
 
 (* todo: the error handling here is plain wrong. Should do something
    special in the `Null case.  *)
-let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : [`Ok of s t | `Error of string]=
+let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : (s t, string) result =
   let open Json_safe in
   let field_value (BoxedField f) =
     let open Type in
@@ -305,12 +307,12 @@ let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : [`Ok of s t | `E
     let typ = Field.ftype f in
     member key json >>= fun m ->
     typ.of_yojson m >>= fun r ->
-    `Ok (fun s -> set s f r)
+    Ok (fun s -> set s f r)
   in
   Json_safe.mapM field_value s.fields >>= fun kvs ->
   let s = Unsafe.make s in
   List.iter (fun f -> f s) kvs;
-  `Ok s
+  Ok s
 
 module Util = struct
   let layout_type layout =
