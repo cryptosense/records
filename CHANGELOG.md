@@ -8,6 +8,7 @@
   `ppx_deriving_yojson >= 3.0` (#18). The `of_string` parameter of `make_string`
   follows the same convention.
 - Compile with debugging information (#17).
+- Install library with profiling information (#19).
 
 ## v0.5.0
 
