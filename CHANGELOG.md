@@ -7,6 +7,7 @@
 * Update `of_yojson` function to use `Result` to be compatible with
   `ppx_deriving_yojson >= 3.0` (#18). The `of_string` parameter of `make_string`
   follows the same convention.
+- Compile with debugging information (#17).
 
 ## v0.5.0
 
