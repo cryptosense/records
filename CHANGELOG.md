@@ -4,6 +4,9 @@
 
 - Remove deprecated functions
 * `Record.format` now outputs a string based on `Yojson.Safe`.
+* Update `of_yojson` function to use `Result` to be compatible with
+  `ppx_deriving_yojson >= 3.0` (#18). The `of_string` parameter of `make_string`
+  follows the same convention.
 
 ## v0.5.0
 
