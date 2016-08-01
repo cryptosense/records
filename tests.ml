@@ -1,4 +1,5 @@
 open OUnit2
+open Result
 
 type r
 let rt : r Record.layout = Record.Unsafe.declare "r"
@@ -150,8 +151,8 @@ let safe_record_layout ctxt =
     )
 
 let force = function
-  | `Ok x -> x
-  | `Error _ -> assert false
+  | Ok x -> x
+  | Error _ -> assert false
 
 let of_json ctxt =
   let j = `Assoc [("x", `Int 2)] in
@@ -359,13 +360,13 @@ let view ctxt =
     let open Record.Type in
     view
       ~name:"int_array"
-      ~read:(fun x -> `Ok (Array.of_list x))
+      ~read:(fun x -> Ok (Array.of_list x))
       ~write:Array.to_list
       (list int)
   in
   let j = `List [`Int 3 ; `Int 14 ; `Int 15] in
   let a = [|3 ; 14 ; 15|] in
-  assert_equal ~ctxt (`Ok a) (Record.Type.of_yojson int_array j);
+  assert_equal ~ctxt (Ok a) (Record.Type.of_yojson int_array j);
   assert_equal ~ctxt j (Record.Type.to_yojson int_array a)
 
 let suite =
