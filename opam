@@ -6,12 +6,12 @@ bug-reports: "https://github.com/cryptosense/records/issues"
 license: "BSD-2"
 dev-repo: "https://github.com/cryptosense/records.git"
 build: [
-    [make] {ocaml-native}
-    [make "byte"] {!ocaml-native}
+  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]
 ]
-install: [make "install"]
-build-test: [make "check"]
-remove: ["ocamlfind" "remove" "records"]
+build-test: [
+  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" "--tests" "true" ]
+  [ "ocaml" "pkg/pkg.ml" "test" ]
+]
 depends: [
   "ocamlfind" {build}
   "ounit" {test}
