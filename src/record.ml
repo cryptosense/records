@@ -6,6 +6,9 @@ module Json_safe = struct
     | Error e -> Error e
     | Ok y -> f y
 
+  let (>>|) x f =
+    x >>= fun y -> Result.Ok (f y)
+
   let rec mapM f = function
     | [] -> Ok []
     | x::xs ->
@@ -89,11 +92,11 @@ module Type = struct
     let of_yojson =
       function
       | `Assoc ["Ok", x] ->
-        ta.of_yojson x >>= fun y ->
-        Result.Ok (Result.Ok y)
+        ta.of_yojson x >>| fun y ->
+        Result.Ok y
       | `Assoc ["Error", x] ->
-        tb.of_yojson x >>= fun y ->
-        Result.Ok (Result.Error y)
+        tb.of_yojson x >>| fun y ->
+        Result.Error y
       | _ -> Result.Error "result_of_json"
     in
     make
@@ -328,13 +331,13 @@ let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : (s t, string) re
     let key = Field.name f in
     let typ = Field.ftype f in
     member key json >>= fun m ->
-    typ.of_yojson m >>= fun r ->
-    Ok (fun s -> set s f r)
+    typ.of_yojson m >>| fun r s ->
+    set s f r
   in
-  Json_safe.mapM field_value s.fields >>= fun kvs ->
+  Json_safe.mapM field_value s.fields >>| fun kvs ->
   let s = Unsafe.make s in
   List.iter (fun f -> f s) kvs;
-  Ok s
+  s
 
 module Util = struct
   let layout_type layout =
