@@ -1,6 +1,8 @@
+(** Dynamic records *)
+
 open Result
 
-(** {2} Layouts *)
+(** {2 Layouts} *)
 
 (** The representation of record types. ['s] is usually a phantom type.
     Two interfaces are provided for creating layouts, in [Unsafe] and [Safe].
@@ -10,7 +12,7 @@ type 's layout
 (** Raised by [field] or [seal] if layout has already been sealed. *)
 exception ModifyingSealedStruct of string
 
-(** {2} Records *)
+(** {2 Records} *)
 
 (** The representation of record values. *)
 type 's t =
@@ -26,7 +28,7 @@ val get_layout : 'a t -> 'a layout
 (** Raised by [make] when the corresponding layout has not been sealed. *)
 exception AllocatingUnsealedStruct of string
 
-(** {3} Type converters *)
+(** {3 Type converters} *)
 module Type : sig
   (**
      How to convert a type to and from JSON.
@@ -123,7 +125,7 @@ module Polid : sig
   val is_equal: 'a t -> 'b t -> bool
 end
 
-(** {3} Unsafe interface *)
+(** {3 Unsafe interface} *)
 module Unsafe : sig
   (** The [Unsafe.declare] function returns a ['s layout], which is only safe
       when ['s] is only instanciated once in this context.
@@ -150,7 +152,7 @@ module Unsafe : sig
   val layout_id: 's layout -> 's Polid.t
 end
 
-(** {3} Safe interface *)
+(** {3 Safe interface} *)
 module Safe :
 sig
   (**
@@ -186,7 +188,7 @@ sig
   val declare : string -> (module LAYOUT)
 end
 
-(** {2} Miscellaneous *)
+(** {2 Miscellaneous} *)
 
 (** Convert a record to JSON. *)
 val to_yojson: 'a t -> Yojson.Safe.json

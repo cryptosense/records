@@ -5,6 +5,7 @@ homepage: "https://github.com/cryptosense/records"
 bug-reports: "https://github.com/cryptosense/records/issues"
 license: "BSD-2"
 dev-repo: "https://github.com/cryptosense/records.git"
+doc: "https://cryptosense.github.io/records/doc"
 build: [
   [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]
 ]
