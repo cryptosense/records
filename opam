@@ -17,5 +17,6 @@ depends: [
   "ounit" {test}
   "yojson"
   "result"
+  "topkg" {build}
 ]
 available: [ocaml-version >= "4.02.0"]
