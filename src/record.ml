@@ -80,6 +80,28 @@ module Type = struct
       ~of_yojson
       ()
 
+  let result ta tb =
+    let open Json_safe in
+    let to_yojson = function
+      | Result.Ok x -> `Assoc ["Ok", ta.to_yojson x]
+      | Result.Error x -> `Assoc ["Error", tb.to_yojson x]
+    in
+    let of_yojson =
+      function
+      | `Assoc ["Ok", x] ->
+        ta.of_yojson x >>= fun y ->
+        Result.Ok (Result.Ok y)
+      | `Assoc ["Error", x] ->
+        tb.of_yojson x >>= fun y ->
+        Result.Ok (Result.Error y)
+      | _ -> Result.Error "result_of_json"
+    in
+    make
+      ~name: (Printf.sprintf "(%s,%s) Result.t" ta.name tb.name )
+      ~to_yojson
+      ~of_yojson
+      ()
+
   let unit =
     make
       ~name: "unit"

@@ -76,6 +76,9 @@ module Type : sig
    *)
   val product_2: string -> 'a t -> string -> 'b t -> ('a * 'b) t
 
+  (** Build a representation of a [result]. *)
+  val result : 'a t -> 'b t -> ('a, 'b) Result.result t
+
   (** Build a ['b] type which has the same JSON encoding as the ['a] type from
       conversion functions [read] and [write]. *)
   val view : name:string -> read:('a -> ('b, string) result) -> write:('b -> 'a) -> 'a t -> 'b t

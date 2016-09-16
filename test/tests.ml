@@ -29,6 +29,11 @@ struct
   module Rlt = (val Record.Safe.declare "rl")
   let value_l = Rlt.field "value_list" (Record.Type.list Record.Type.int)
   let () = Rlt.seal ()
+
+  module Rres = (val Record.Safe.declare "rr")
+  let value_r1 = Rres.field "r1" (Record.Type.result Record.Type.int Record.Type.string)
+  let value_r2 = Rres.field "r2" (Record.Type.result Record.Type.int Record.Type.string)
+  let () = Rres.seal ()
 end
 
 let set_get ctxt =
@@ -268,6 +273,24 @@ let safe_json_list ctxt =
   let recovered = force @@ Record.of_yojson Rlt.layout json in
   assert_equal [3; 14; 15] (Record.get recovered value_l)
 
+let safe_json_result ctxt =
+  let open Safe_layouts in
+  let r = Rres.make () in
+  Record.set r value_r1 (Result.Ok 35);
+  Record.set r value_r2 (Result.Error "no");
+  let json =
+    `Assoc
+      [ "r1", `Assoc ["Ok", `Int 35]
+      ; "r2", `Assoc ["Error", `String "no"]
+      ]
+  in
+  let printer = Yojson.Safe.pretty_to_string in
+  assert_equal ~printer json (Record.to_yojson r);
+  let recovered_1 = force @@ Record.of_yojson Rres.layout json in
+  assert_equal (Result.Ok 35) (Record.get recovered_1 value_r1);
+  let recovered_2 = force @@ Record.of_yojson Rres.layout json in
+  assert_equal (Result.Error "no") (Record.get recovered_2 value_r2)
+
 let declare0 ctxt =
   let l = Record.Util.declare0 ~name:"r" in
   assert_equal "r" (Record.Unsafe.layout_name l)
@@ -408,6 +431,7 @@ let suite =
     ; "Safe JSON writer (null field)" >:: safe_to_json_null
     ; "Safe JSON (product)" >:: safe_json_product
     ; "Safe JSON (list)" >:: safe_json_list
+    ; "Safe JSON (result)" >:: safe_json_result
     ; "Safe layout_type" >:: safe_layout_type
     ]
 
