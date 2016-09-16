@@ -3,7 +3,7 @@ open Result
 module Json_safe = struct
   let (>>=) x f =
     match x with
-    | Error e -> Error e
+    | Error _ as e -> e
     | Ok y -> f y
 
   let (>>|) x f =
