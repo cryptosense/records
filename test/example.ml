@@ -12,4 +12,4 @@ let _ =
   Record.set p x 3;
   Record.set p y 4;
   Record.set p z 5;
-  Record.format Format.std_formatter p
+  Yojson.Safe.to_channel stdout @@ Record.to_yojson p
