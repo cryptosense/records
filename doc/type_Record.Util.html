@@ -1,0 +1,49 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Record" rel="Chapter" href="Record.html"><title>Record.Util</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;layout_type&nbsp;:&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Record</span>.layout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Record</span>.t&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;declare0&nbsp;:&nbsp;name:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>s&nbsp;<span class="constructor">Record</span>.layout<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;declare1&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_type:<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>s&nbsp;<span class="constructor">Record</span>.layout&nbsp;*&nbsp;(<span class="keywordsign">'</span>a,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;declare2&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_type:<span class="keywordsign">'</span>a1&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f2_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f2_type:<span class="keywordsign">'</span>a2&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">'</span>s&nbsp;<span class="constructor">Record</span>.layout&nbsp;*&nbsp;(<span class="keywordsign">'</span>a1,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t&nbsp;*&nbsp;(<span class="keywordsign">'</span>a2,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;declare3&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_type:<span class="keywordsign">'</span>a1&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f2_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f2_type:<span class="keywordsign">'</span>a2&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f3_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f3_type:<span class="keywordsign">'</span>a3&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">'</span>s&nbsp;<span class="constructor">Record</span>.layout&nbsp;*&nbsp;(<span class="keywordsign">'</span>a1,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t&nbsp;*&nbsp;(<span class="keywordsign">'</span>a2,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t&nbsp;*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keywordsign">'</span>a3,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;declare4&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f1_type:<span class="keywordsign">'</span>a1&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f2_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f2_type:<span class="keywordsign">'</span>a2&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f3_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f3_type:<span class="keywordsign">'</span>a3&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f4_name:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;f4_type:<span class="keywordsign">'</span>a4&nbsp;<span class="constructor">Record</span>.<span class="constructor">Type</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">'</span>s&nbsp;<span class="constructor">Record</span>.layout&nbsp;*&nbsp;(<span class="keywordsign">'</span>a1,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t&nbsp;*&nbsp;(<span class="keywordsign">'</span>a2,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t&nbsp;*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keywordsign">'</span>a3,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t&nbsp;*&nbsp;(<span class="keywordsign">'</span>a4,&nbsp;<span class="keywordsign">'</span>s)&nbsp;<span class="constructor">Record</span>.<span class="constructor">Field</span>.t<br>
+<span class="keyword">end</span></code></body></html>

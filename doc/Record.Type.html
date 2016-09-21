@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="next" href="Record.Field.html">
+<link rel="Up" href="Record.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Record" rel="Chapter" href="Record.html"><title>Record.Type</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="Record.html" title="Record">Up</a>
+&nbsp;<a class="post" href="Record.Field.html" title="Record.Field">Next</a>
+</div>
+<h1>Module <a href="type_Record.Type.html">Record.Type</a></h1>
+
+<pre><span class="keyword">module</span> Type: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Type.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+<h3 id="3_Typeconverters">Type converters</h3><br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type">'a</code> t</span> </pre>
+<div class="info ">
+How to convert a type to and from JSON.<br>
+</div>
+
+
+<pre><span id="VALname"><span class="keyword">val</span> name</span> : <code class="type">'a <a href="Record.Type.html#TYPEt">t</a> -> string</code></pre>
+<pre><span id="VALof_yojson"><span class="keyword">val</span> of_yojson</span> : <code class="type">'a <a href="Record.Type.html#TYPEt">t</a> -> Yojson.Safe.json -> ('a, string) Result.result</code></pre>
+<pre><span id="VALto_yojson"><span class="keyword">val</span> to_yojson</span> : <code class="type">'a <a href="Record.Type.html#TYPEt">t</a> -> 'a -> Yojson.Safe.json</code></pre>
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">name:string -><br>       to_yojson:('a -> Yojson.Safe.json) -><br>       of_yojson:(Yojson.Safe.json -> ('a, string) Result.result) -><br>       unit -> 'a <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+Declare a new type.<br>
+</div>
+
+<pre><span id="VALmake_string"><span class="keyword">val</span> make_string</span> : <code class="type">name:string -><br>       to_string:('a -> string) -><br>       of_string:(string -> ('a, string) Result.result) -> unit -> 'a <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+Declare a new type that marshal/unmarshal to strings.<br>
+</div>
+
+<pre><span id="VALexn"><span class="keyword">val</span> exn</span> : <code class="type">exn <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+How to represent exceptions.<br>
+</div>
+
+<pre><span id="EXCEPTIONUnserializedException"><span class="keyword">exception</span> UnserializedException</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+<div class="info ">
+Raised by <code class="code">exn.of_json</code><br>
+</div>
+
+<pre><span id="VALunit"><span class="keyword">val</span> unit</span> : <code class="type">unit <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+How to represent <code class="code">unit</code>.<br>
+</div>
+
+<pre><span id="VALstring"><span class="keyword">val</span> string</span> : <code class="type">string <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+How to represent <code class="code">string</code>.<br>
+</div>
+
+<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type">int <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+How to represent <code class="code">int</code>.<br>
+</div>
+
+<pre><span id="VALlist"><span class="keyword">val</span> list</span> : <code class="type">'a <a href="Record.Type.html#TYPEt">t</a> -> 'a list <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+Build a representation of a list.<br>
+</div>
+
+<pre><span id="VALproduct_2"><span class="keyword">val</span> product_2</span> : <code class="type">string -><br>       'a <a href="Record.Type.html#TYPEt">t</a> -> string -> 'b <a href="Record.Type.html#TYPEt">t</a> -> ('a * 'b) <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+Build a representation of a couple.
+      The labels identify the elements, not their types.<br>
+</div>
+
+<pre><span id="VALresult"><span class="keyword">val</span> result</span> : <code class="type">'a <a href="Record.Type.html#TYPEt">t</a> -> 'b <a href="Record.Type.html#TYPEt">t</a> -> ('a, 'b) Result.result <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+Build a representation of a <code class="code">result</code>.<br>
+</div>
+
+<pre><span id="VALview"><span class="keyword">val</span> view</span> : <code class="type">name:string -><br>       read:('a -> ('b, string) Result.result) -><br>       write:('b -> 'a) -> 'a <a href="Record.Type.html#TYPEt">t</a> -> 'b <a href="Record.Type.html#TYPEt">t</a></code></pre><div class="info ">
+Build a <code class="code"><span class="keywordsign">'</span>b</code> type which has the same JSON encoding as the <code class="code"><span class="keywordsign">'</span>a</code> type from
+      conversion functions <code class="code">read</code> and <code class="code">write</code>.<br>
+</div>
+</body></html>

@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Record" rel="Chapter" href="Record.html"><link title="Layouts" rel="Section" href="#2_Layouts">
+<link title="Records" rel="Section" href="#2_Records">
+<link title="Miscellaneous" rel="Section" href="#2_Miscellaneous">
+<title>Record</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Record.html">Record</a></h1>
+
+<pre><span class="keyword">module</span> Record: <code class="code"><span class="keyword">sig</span></code> <a href="Record.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+Dynamic records<br>
+</div>
+<hr width="100%">
+<br>
+<h2 id="2_Layouts">Layouts</h2><br>
+
+<pre><span id="TYPElayout"><span class="keyword">type</span> <code class="type">'s</code> layout</span> </pre>
+<div class="info ">
+The representation of record types. <code class="code"><span class="keywordsign">'</span>s</code> is usually a phantom type.
+    Two interfaces are provided for creating layouts, in <code class="code"><span class="constructor">Unsafe</span></code> and <code class="code"><span class="constructor">Safe</span></code>.<br>
+</div>
+
+
+<pre><span id="EXCEPTIONModifyingSealedStruct"><span class="keyword">exception</span> ModifyingSealedStruct</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+<div class="info ">
+Raised by <code class="code">field</code> or <code class="code">seal</code> if layout has already been sealed.<br>
+</div>
+<br>
+<h2 id="2_Records">Records</h2><br>
+
+<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type">'s</code> t</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.layout">layout</span>&nbsp;: <code class="type">'s <a href="Record.html#TYPElayout">layout</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.content">content</span>&nbsp;: <code class="type">'s <a href="Record.html#TYPEcontent">content</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+The representation of record values.<br>
+</div>
+
+
+<pre><span id="TYPEcontent"><span class="keyword">type</span> <code class="type">'s</code> content</span> </pre>
+
+
+<pre><span id="VALget_layout"><span class="keyword">val</span> get_layout</span> : <code class="type">'a <a href="Record.html#TYPEt">t</a> -> 'a <a href="Record.html#TYPElayout">layout</a></code></pre><div class="info ">
+Get the layout of a record.<br>
+</div>
+
+<pre><span id="EXCEPTIONAllocatingUnsealedStruct"><span class="keyword">exception</span> AllocatingUnsealedStruct</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+<div class="info ">
+Raised by <code class="code">make</code> when the corresponding layout has not been sealed.<br>
+</div>
+
+<pre><span class="keyword">module</span> <a href="Record.Type.html">Type</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Type.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+Type converters
+</div>
+
+<pre><span class="keyword">module</span> <a href="Record.Field.html">Field</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Field.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><span id="VALget"><span class="keyword">val</span> get</span> : <code class="type">'s <a href="Record.html#TYPEt">t</a> -> ('a, 's) <a href="Record.Field.html#TYPEt">Field.t</a> -> 'a</code></pre><div class="info ">
+Get the value of a field.<br>
+</div>
+
+<pre><span id="VALset"><span class="keyword">val</span> set</span> : <code class="type">'s <a href="Record.html#TYPEt">t</a> -> ('a, 's) <a href="Record.Field.html#TYPEt">Field.t</a> -> 'a -> unit</code></pre><div class="info ">
+Set the value of a field.<br>
+</div>
+
+<pre><span id="EXCEPTIONUndefinedField"><span class="keyword">exception</span> UndefinedField</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+<div class="info ">
+Raised by <code class="code">get</code> if the field was not set.<br>
+</div>
+
+<pre><span class="keyword">module</span> <a href="Record.Polid.html">Polid</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Polid.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><span class="keyword">module</span> <a href="Record.Unsafe.html">Unsafe</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Unsafe.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+Unsafe interface
+</div>
+
+<pre><span class="keyword">module</span> <a href="Record.Safe.html">Safe</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Safe.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+Safe interface
+</div>
+<br>
+<h2 id="2_Miscellaneous">Miscellaneous</h2><br>
+
+<pre><span id="VALto_yojson"><span class="keyword">val</span> to_yojson</span> : <code class="type">'a <a href="Record.html#TYPEt">t</a> -> Yojson.Safe.json</code></pre><div class="info ">
+Convert a record to JSON.<br>
+</div>
+
+<pre><span id="VALof_yojson"><span class="keyword">val</span> of_yojson</span> : <code class="type">'a <a href="Record.html#TYPElayout">layout</a> -> Yojson.Safe.json -> ('a <a href="Record.html#TYPEt">t</a>, string) Result.result</code></pre><div class="info ">
+Convert a JSON value into a given schema.<br>
+</div>
+
+<pre><span class="keyword">module</span> <a href="Record.Util.html">Util</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Util.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><span id="VALequal"><span class="keyword">val</span> equal</span> : <code class="type">'a <a href="Record.html#TYPElayout">layout</a> -> 'b <a href="Record.html#TYPElayout">layout</a> -> ('a, 'b) <a href="Record.Polid.html#TYPEequal">Polid.equal</a></code></pre><div class="info ">
+Equality predicate.<br>
+</div>
+
+<pre><span id="VALformat"><span class="keyword">val</span> format</span> : <code class="type">Format.formatter -> 'a <a href="Record.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+Print the JSON representation of a record to a formatter.<br>
+</div>
+</body></html>

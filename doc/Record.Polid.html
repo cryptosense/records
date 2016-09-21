@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Record.Field.html">
+<link rel="next" href="Record.Unsafe.html">
+<link rel="Up" href="Record.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Record" rel="Chapter" href="Record.html"><title>Record.Polid</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Record.Field.html" title="Record.Field">Previous</a>
+&nbsp;<a class="up" href="Record.html" title="Record">Up</a>
+&nbsp;<a class="post" href="Record.Unsafe.html" title="Record.Unsafe">Next</a>
+</div>
+<h1>Module <a href="type_Record.Polid.html">Record.Polid</a></h1>
+
+<pre><span class="keyword">module</span> Polid: <code class="code"><span class="keyword">sig</span></code> <a href="Record.Polid.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type">'a</code> t</span> </pre>
+<div class="info ">
+The type of identifiers associated to type <code class="code"><span class="keywordsign">'</span>a</code>.<br>
+</div>
+
+
+<pre><span id="VALfresh"><span class="keyword">val</span> fresh</span> : <code class="type">unit -> 'a <a href="Record.Polid.html#TYPEt">t</a></code></pre><div class="info ">
+Make a new, fresh identifier.
+      This is the only way to obtain a value of type <code class="code">t</code>.<br>
+</div>
+
+<pre><code><span id="TYPEequal"><span class="keyword">type</span> <code class="type">('a, 'b)</code> equal</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTequal.Equal"><span class="constructor">Equal</span></span> <span class="keyword">:</span> <code class="type">('a0, 'a0) <a href="Record.Polid.html#TYPEequal">equal</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTequal.Different"><span class="constructor">Different</span></span> <span class="keyword">:</span> <code class="type">('a1, 'b0) <a href="Record.Polid.html#TYPEequal">equal</a></code></code></td>
+
+</tr></table>
+
+<div class="info ">
+Type constraint which is conditioned on identifier equality.<br>
+</div>
+
+
+<pre><span id="VALequal"><span class="keyword">val</span> equal</span> : <code class="type">'a <a href="Record.Polid.html#TYPEt">t</a> -> 'b <a href="Record.Polid.html#TYPEt">t</a> -> ('a, 'b) <a href="Record.Polid.html#TYPEequal">equal</a></code></pre><div class="info ">
+Equality predicate.<br>
+</div>
+
+<pre><span id="VALto_int"><span class="keyword">val</span> to_int</span> : <code class="type">'a <a href="Record.Polid.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+Convert an identifier to an integer.
+      The integer is guaranteed to be unique for each call to <a href="Record.Polid.html#VALfresh"><code class="code"><span class="constructor">Record</span>.<span class="constructor">Polid</span>.fresh</code></a>.<br>
+</div>
+
+<pre><span id="VALis_equal"><span class="keyword">val</span> is_equal</span> : <code class="type">'a <a href="Record.Polid.html#TYPEt">t</a> -> 'b <a href="Record.Polid.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">equal</code> projected to a plain <code class="code">bool</code>.<br>
+</div>
+</body></html>
