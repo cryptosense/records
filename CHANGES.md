@@ -1,4 +1,13 @@
-## unreleased
+## v0.7.0
+
+*2016-09-21*
+
+- Support OCaml 4.04
+- Build using topkg:
+  - Autogenerate API docs
+  - Build example
+- Add `Record.Type.result` for `result` values
+- Deprecate `Record.format`
 
 ## v0.6.0
 
