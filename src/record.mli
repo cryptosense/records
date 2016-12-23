@@ -66,7 +66,13 @@ module Type : sig
   val string: string t
 
   (** How to represent [int]. *)
-  val int: int  t
+  val int: int t
+
+  (** How to represent [int32]. *)
+  val int32: int32 t
+
+  (** How to represent [int64]. *)
+  val int64: int64 t
 
   (** Build a representation of a list. *)
   val list: 'a t -> 'a list t
