@@ -146,6 +146,32 @@ module Type = struct
       ~of_yojson
       ()
 
+  let int32 =
+    let of_yojson = function
+      | `Int x -> Ok (Int32.of_int x)
+      | `Intlit x -> Ok (Int32.of_string x)
+      | _ -> Error "int32.of_yojson"
+    in
+    let to_yojson n = `Intlit (Int32.to_string n) in
+    make
+      ~name:"int32"
+      ~to_yojson
+      ~of_yojson
+      ()
+
+  let int64 =
+    let of_yojson = function
+      | `Int x -> Ok (Int64.of_int x)
+      | `Intlit x -> Ok (Int64.of_string x)
+      | _ -> Error "int32.of_yojson"
+    in
+    let to_yojson n = `Intlit (Int64.to_string n) in
+    make
+      ~name:"int64"
+      ~to_yojson
+      ~of_yojson
+      ()
+
   let view ~name ~read ~write typ =
     let to_yojson b =
       typ.to_yojson (write b)
