@@ -76,11 +76,13 @@ module Type : sig
 
   (** Build a representation of a list. *)
   val list: 'a t -> 'a list t
+  [@@deprecated "Please use ppx_deriving_yojson instead"]
 
   (** Build a representation of a couple.
       The labels identify the elements, not their types.
    *)
   val product_2: string -> 'a t -> string -> 'b t -> ('a * 'b) t
+  [@@deprecated "Please use ppx_deriving_yojson instead"]
 
   (** Build a representation of a [result]. *)
   val result : 'a t -> 'b t -> ('a, 'b) Result.result t
