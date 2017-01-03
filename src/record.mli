@@ -255,7 +255,3 @@ end
 
 (** Equality predicate. *)
 val equal: 'a layout -> 'b layout -> ('a, 'b) Polid.equal
-
-(** Print the JSON representation of a record to a formatter. *)
-val format: Format.formatter -> 'a t -> unit
-[@@deprecated "Please use Yojson.Safe.to_string instead"]
