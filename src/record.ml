@@ -413,9 +413,6 @@ module Util = struct
     (layout, f1, f2, f3, f4)
 end
 
-let format (type s) fmt (s: s t) : unit =
-  Format.fprintf fmt "%s" (Yojson.Safe.to_string (to_yojson s))
-
 module Safe =
 struct
   module type LAYOUT =
