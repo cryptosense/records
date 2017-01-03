@@ -1,3 +1,29 @@
+## v0.8.0
+
+*2017-01-03*
+
+### Breaking changes
+
+- Remove `Record.format` (#32) - was previously deprecated.
+  The alternative is to invoke `yojson` by hand.
+
+### Deprecated functions
+
+- Deprecate `Type.list` and `Type.product_2` (#30).
+  The alternative is to write converter functions by hand or by using
+  `ppx_deriving_yojson`.
+
+### New features
+
+- Add `Type.int{32,64}` (#28)
+
+### Build system
+
+- Use docker in Travis (#31)
+- Add `descr` file for `topkg opam`.
+- Add `org:cryptosense` tag.
+- Add merlin configuration (#29).
+
 ## v0.7.0
 
 *2016-09-21*
