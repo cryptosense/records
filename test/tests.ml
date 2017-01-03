@@ -6,29 +6,11 @@ let rt : r Record.layout = Record.Unsafe.declare "r"
 let x = Record.Unsafe.field rt "x" Record.Type.int
 let () = Record.Unsafe.seal rt
 
-type p
-let rpt : p Record.layout = Record.Unsafe.declare "rp"
-let value_p = Record.Unsafe.field rpt "value_pair" (Record.Type.product_2 "fst" Record.Type.int "snd" Record.Type.int)
-let () = Record.Unsafe.seal rpt
-
-type l
-let rlt : l Record.layout = Record.Unsafe.declare "rl"
-let value_l = Record.Unsafe.field rlt "value_list" (Record.Type.list Record.Type.int)
-let () = Record.Unsafe.seal rlt
-
 module Safe_layouts =
 struct
   module Rt = (val Record.Safe.declare "r")
   let x = Rt.field "x" Record.Type.int
   let () = Rt.seal ()
-
-  module Rpt = (val Record.Safe.declare "rp")
-  let value_p = Rpt.field "value_pair" (Record.Type.product_2 "fst" Record.Type.int "snd" Record.Type.int)
-  let () = Rpt.seal ()
-
-  module Rlt = (val Record.Safe.declare "rl")
-  let value_l = Rlt.field "value_list" (Record.Type.list Record.Type.int)
-  let () = Rlt.seal ()
 
   module Rres = (val Record.Safe.declare "rr")
   let value_r1 = Rres.field "r1" (Record.Type.result Record.Type.int Record.Type.string)
@@ -197,82 +179,6 @@ let safe_to_json_null ctxt =
   let printer = Yojson.Safe.pretty_to_string in
   assert_equal ~printer expected (Record.to_yojson r)
 
-let json_product ctxt  =
-  let r = Record.Unsafe.make rpt in
-  Record.set r value_p (3, 14);
-  let json =
-    `Assoc
-      [ ("value_pair"
-        , `Assoc
-             [ ("fst", `Int 3)
-             ; ("snd", `Int 14)
-             ]
-        )
-      ]
-  in
-  let printer = Yojson.Safe.pretty_to_string in
-  assert_equal ~printer json (Record.to_yojson r);
-  let recovered = force @@ Record.of_yojson rpt json in
-  assert_equal (3, 14) (Record.get recovered value_p)
-
-let safe_json_product ctxt  =
-  let open Safe_layouts in
-  let r = Rpt.make () in
-  Record.set r value_p (3, 14);
-  let json =
-    `Assoc
-      [ ("value_pair"
-        , `Assoc
-             [ ("fst", `Int 3)
-             ; ("snd", `Int 14)
-             ]
-        )
-      ]
-  in
-  let printer = Yojson.Safe.pretty_to_string in
-  assert_equal ~printer json (Record.to_yojson r);
-  let recovered = force @@ Record.of_yojson Rpt.layout json in
-  assert_equal (3, 14) (Record.get recovered value_p)
-
-let json_list ctxt =
-  let r = Record.Unsafe.make rlt in
-  Record.set r value_l [3; 14; 15];
-  let json =
-    `Assoc
-      [ ("value_list"
-        , `List
-             [ `Int 3
-             ; `Int 14
-             ; `Int 15
-             ]
-        )
-      ]
-  in
-  let printer = Yojson.Safe.pretty_to_string in
-  assert_equal ~printer json (Record.to_yojson r);
-  let recovered = force @@ Record.of_yojson rlt json in
-  assert_equal [3; 14; 15] (Record.get recovered value_l)
-
-let safe_json_list ctxt =
-  let open Safe_layouts in
-  let r = Rlt.make () in
-  Record.set r value_l [3; 14; 15];
-  let json =
-    `Assoc
-      [ ("value_list"
-        , `List
-             [ `Int 3
-             ; `Int 14
-             ; `Int 15
-             ]
-        )
-      ]
-  in
-  let printer = Yojson.Safe.pretty_to_string in
-  assert_equal ~printer json (Record.to_yojson r);
-  let recovered = force @@ Record.of_yojson Rlt.layout json in
-  assert_equal [3; 14; 15] (Record.get recovered value_l)
-
 let safe_json_result ctxt =
   let open Safe_layouts in
   let r = Rres.make () in
@@ -379,18 +285,26 @@ let safe_layout_type ctxt =
   assert_equal ~ctxt ~printer expected (Record.to_yojson rp)
 
 let view ctxt =
-  let int_array =
+  let read n =
+    match Char.chr n with
+    | c -> Ok c
+    | exception (Invalid_argument _) -> Error "read"
+  in
+  let write c =
+    Char.code c
+  in
+  let char_as_int =
     let open Record.Type in
     view
-      ~name:"int_array"
-      ~read:(fun x -> Ok (Array.of_list x))
-      ~write:Array.to_list
-      (list int)
+      ~name:"char_as_int"
+      ~read
+      ~write
+      int
   in
-  let j = `List [`Int 3 ; `Int 14 ; `Int 15] in
-  let a = [|3 ; 14 ; 15|] in
-  assert_equal ~ctxt (Ok a) (Record.Type.of_yojson int_array j);
-  assert_equal ~ctxt j (Record.Type.to_yojson int_array a)
+  let j = `Int 0x41 in
+  let c = 'A' in
+  assert_equal ~ctxt (Ok c) (Record.Type.of_yojson char_as_int j);
+  assert_equal ~ctxt j (Record.Type.to_yojson char_as_int c)
 
 let suite =
   "Records" >:::
@@ -407,8 +321,6 @@ let suite =
     ; "JSON reader" >:: of_json
     ; "JSON writer" >:: to_json
     ; "JSON writer (null field)" >:: to_json_null
-    ; "JSON (product)" >:: json_product
-    ; "JSON (list)" >:: json_list
     ; "declare0" >:: declare0
     ; "declare1" >:: declare1
     ; "declare2" >:: declare2
@@ -429,8 +341,6 @@ let suite =
     ; "Safe JSON reader" >:: safe_of_json
     ; "Safe JSON writer" >:: safe_to_json
     ; "Safe JSON writer (null field)" >:: safe_to_json_null
-    ; "Safe JSON (product)" >:: safe_json_product
-    ; "Safe JSON (list)" >:: safe_json_list
     ; "Safe JSON (result)" >:: safe_json_result
     ; "Safe layout_type" >:: safe_layout_type
     ]
