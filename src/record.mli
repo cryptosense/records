@@ -1,7 +1,5 @@
 (** Dynamic records *)
 
-open Result
-
 (** {2 Layouts} *)
 
 (** The representation of record types. ['s] is usually a phantom type.
@@ -75,7 +73,7 @@ module Type : sig
   val int64: int64 t
 
   (** Build a representation of a [result]. *)
-  val result : 'a t -> 'b t -> ('a, 'b) Result.result t
+  val result : 'a t -> 'b t -> ('a, 'b) result t
 
   (** Build a ['b] type which has the same JSON encoding as the ['a] type from
       conversion functions [read] and [write]. *)
