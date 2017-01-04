@@ -66,23 +66,6 @@ module Type = struct
     in
     make_string ~name:"exn" ~to_string ~of_string ()
 
-  let product_2 na ta nb tb =
-    let name = ta.name ^ "_" ^ tb.name in
-    let to_yojson (a, b) =
-      `Assoc [ na, ta.to_yojson a; nb, tb.to_yojson b]
-    in
-    let of_yojson json =
-      let open Json_safe in
-      member na json >>= ta.of_yojson >>= fun a ->
-      member nb json >>= tb.of_yojson >>= fun b ->
-      Ok (a, b)
-    in
-    make
-      ~name
-      ~to_yojson
-      ~of_yojson
-      ()
-
   let result ta tb =
     let open Json_safe in
     let to_yojson = function
@@ -110,18 +93,6 @@ module Type = struct
       ~name: "unit"
       ~to_yojson: (fun () -> `Null)
       ~of_yojson: (fun _ -> Ok ())
-      ()
-
-  let list typ =
-    let to_yojson list = `List (List.map typ.to_yojson list) in
-    let of_yojson = function
-      | `List xs -> Json_safe.mapM typ.of_yojson xs
-      | _ -> Error "Not a JSON list"
-    in
-    make
-      ~name: (typ.name ^ "_list")
-      ~to_yojson
-      ~of_yojson
       ()
 
   let string =
