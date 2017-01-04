@@ -9,12 +9,11 @@ module Json_safe = struct
   let (>>|) x f =
     x >>= fun y -> Result.Ok (f y)
 
-  let rec mapM f = function
-    | [] -> Ok []
+  let rec mapM_ f = function
+    | [] -> Ok ()
     | x::xs ->
-      f x >>= fun y ->
-      mapM f xs >>= fun ys ->
-      Ok (y::ys)
+      f x >>= fun () ->
+      mapM_ f xs
 
   let rec assoc_option key = function
     | [] -> None
@@ -66,23 +65,6 @@ module Type = struct
     in
     make_string ~name:"exn" ~to_string ~of_string ()
 
-  let product_2 na ta nb tb =
-    let name = ta.name ^ "_" ^ tb.name in
-    let to_yojson (a, b) =
-      `Assoc [ na, ta.to_yojson a; nb, tb.to_yojson b]
-    in
-    let of_yojson json =
-      let open Json_safe in
-      member na json >>= ta.of_yojson >>= fun a ->
-      member nb json >>= tb.of_yojson >>= fun b ->
-      Ok (a, b)
-    in
-    make
-      ~name
-      ~to_yojson
-      ~of_yojson
-      ()
-
   let result ta tb =
     let open Json_safe in
     let to_yojson = function
@@ -110,18 +92,6 @@ module Type = struct
       ~name: "unit"
       ~to_yojson: (fun () -> `Null)
       ~of_yojson: (fun _ -> Ok ())
-      ()
-
-  let list typ =
-    let to_yojson list = `List (List.map typ.to_yojson list) in
-    let of_yojson = function
-      | `List xs -> Json_safe.mapM typ.of_yojson xs
-      | _ -> Error "Not a JSON list"
-    in
-    make
-      ~name: (typ.name ^ "_list")
-      ~to_yojson
-      ~of_yojson
       ()
 
   let string =
@@ -352,18 +322,17 @@ let to_yojson (type s) (s : s t) : Yojson.Safe.json =
    special in the `Null case.  *)
 let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : (s t, string) result =
   let open Json_safe in
+  let r = Unsafe.make s in
   let field_value (BoxedField f) =
     let open Type in
     let key = Field.name f in
     let typ = Field.ftype f in
     member key json >>= fun m ->
-    typ.of_yojson m >>| fun r s ->
-    set s f r
+    typ.of_yojson m >>| fun v ->
+    set r f v
   in
-  Json_safe.mapM field_value s.fields >>| fun kvs ->
-  let s = Unsafe.make s in
-  List.iter (fun f -> f s) kvs;
-  s
+  Json_safe.mapM_ field_value s.fields >>| fun () ->
+  r
 
 module Util = struct
   let layout_type layout =
