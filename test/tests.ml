@@ -1,5 +1,4 @@
 open OUnit2
-open Result
 
 type r
 let rt : r Record.layout = Record.Unsafe.declare "r"
@@ -182,8 +181,8 @@ let safe_to_json_null ctxt =
 let safe_json_result ctxt =
   let open Safe_layouts in
   let r = Rres.make () in
-  Record.set r value_r1 (Result.Ok 35);
-  Record.set r value_r2 (Result.Error "no");
+  Record.set r value_r1 (Ok 35);
+  Record.set r value_r2 (Error "no");
   let json =
     `Assoc
       [ "r1", `Assoc ["Ok", `Int 35]
@@ -193,9 +192,9 @@ let safe_json_result ctxt =
   let printer = Yojson.Safe.pretty_to_string in
   assert_equal ~printer json (Record.to_yojson r);
   let recovered_1 = force @@ Record.of_yojson Rres.layout json in
-  assert_equal (Result.Ok 35) (Record.get recovered_1 value_r1);
+  assert_equal (Ok 35) (Record.get recovered_1 value_r1);
   let recovered_2 = force @@ Record.of_yojson Rres.layout json in
-  assert_equal (Result.Error "no") (Record.get recovered_2 value_r2)
+  assert_equal (Error "no") (Record.get recovered_2 value_r2)
 
 let declare0 ctxt =
   let l = Record.Util.declare0 ~name:"r" in

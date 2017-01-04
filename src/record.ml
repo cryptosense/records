@@ -1,5 +1,3 @@
-open Result
-
 module Json_safe = struct
   let (>>=) x f =
     match x with
@@ -7,7 +5,7 @@ module Json_safe = struct
     | Ok y -> f y
 
   let (>>|) x f =
-    x >>= fun y -> Result.Ok (f y)
+    x >>= fun y -> Ok (f y)
 
   let rec mapM_ f = function
     | [] -> Ok ()
@@ -68,18 +66,18 @@ module Type = struct
   let result ta tb =
     let open Json_safe in
     let to_yojson = function
-      | Result.Ok x -> `Assoc ["Ok", ta.to_yojson x]
-      | Result.Error x -> `Assoc ["Error", tb.to_yojson x]
+      | Ok x -> `Assoc ["Ok", ta.to_yojson x]
+      | Error x -> `Assoc ["Error", tb.to_yojson x]
     in
     let of_yojson =
       function
       | `Assoc ["Ok", x] ->
         ta.of_yojson x >>| fun y ->
-        Result.Ok y
+        Ok y
       | `Assoc ["Error", x] ->
         tb.of_yojson x >>| fun y ->
-        Result.Error y
-      | _ -> Result.Error "result_of_json"
+        Error y
+      | _ -> Error "result_of_json"
     in
     make
       ~name: (Printf.sprintf "(%s,%s) Result.t" ta.name tb.name )

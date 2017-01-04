@@ -4,5 +4,6 @@ true: package(yojson)
 true: package(result)
 true: safe_string
 true: warn_error(+8)
+true: open(Result)
 <src>: include
 <test/*>: package(oUnit)
