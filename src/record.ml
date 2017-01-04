@@ -9,12 +9,11 @@ module Json_safe = struct
   let (>>|) x f =
     x >>= fun y -> Result.Ok (f y)
 
-  let rec mapM f = function
-    | [] -> Ok []
+  let rec mapM_ f = function
+    | [] -> Ok ()
     | x::xs ->
-      f x >>= fun y ->
-      mapM f xs >>= fun ys ->
-      Ok (y::ys)
+      f x >>= fun () ->
+      mapM_ f xs
 
   let rec assoc_option key = function
     | [] -> None
@@ -323,18 +322,17 @@ let to_yojson (type s) (s : s t) : Yojson.Safe.json =
    special in the `Null case.  *)
 let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : (s t, string) result =
   let open Json_safe in
+  let r = Unsafe.make s in
   let field_value (BoxedField f) =
     let open Type in
     let key = Field.name f in
     let typ = Field.ftype f in
     member key json >>= fun m ->
-    typ.of_yojson m >>| fun r s ->
-    set s f r
+    typ.of_yojson m >>| fun v ->
+    set r f v
   in
-  Json_safe.mapM field_value s.fields >>| fun kvs ->
-  let s = Unsafe.make s in
-  List.iter (fun f -> f s) kvs;
-  s
+  Json_safe.mapM_ field_value s.fields >>| fun () ->
+  r
 
 module Util = struct
   let layout_type layout =
