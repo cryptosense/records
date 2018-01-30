@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cryptosense/records.svg)](https://travis-ci.org/cryptosense/records)
+[![Build Status](https://travis-ci.org/cryptosense/records.svg)](https://travis-ci.org/cryptosense/records) [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://cryptosense.github.io/records/doc/)
 
 Dynamic records
 ===============
