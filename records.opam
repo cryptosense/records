@@ -7,18 +7,16 @@ license: "BSD-2"
 dev-repo: "https://github.com/cryptosense/records.git"
 doc: "https://cryptosense.github.io/records/doc"
 build: [
-  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 build-test: [
-  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" "--tests" "true" ]
-  [ "ocaml" "pkg/pkg.ml" "test" ]
+  ["dune" "runtest" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocamlfind" {build}
-  "ounit" {test}
-  "yojson"
+  "dune" {build & >= "1.1.0"}
+  "ounit" {test & >= "2.0.0"}
   "result"
-  "topkg" {build}
+  "yojson"
 ]
 tags: ["org:cryptosense"]
 available: [ocaml-version >= "4.02.0"]

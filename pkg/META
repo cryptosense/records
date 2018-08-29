@@ -1,7 +1,0 @@
-version = "%%VERSION_NUM%%"
-description = "Dynamic records"
-archive(byte) = "records.cma"
-archive(native) = "records.cmxa"
-plugin(byte) = "records.cma"
-plugin(native) = "records.cmxs"
-requires = "yojson"

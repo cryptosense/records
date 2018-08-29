@@ -1,3 +1,5 @@
+open Result
+
 module Json_safe = struct
   let (>>=) x f =
     match x with

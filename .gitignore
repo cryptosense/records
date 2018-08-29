@@ -1,2 +1,4 @@
-_build
+*.install
+*.merlin
 *.native
+_build
