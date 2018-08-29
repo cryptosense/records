@@ -34,21 +34,21 @@ module Type : sig
   type 'a t
 
   val name : 'a t -> string
-  val of_yojson : 'a t -> (Yojson.Safe.json -> ('a, string) result)
+  val of_yojson : 'a t -> (Yojson.Safe.json -> ('a, string) Result.result)
   val to_yojson : 'a t -> ('a -> Yojson.Safe.json)
 
   (** Declare a new type. *)
   val make:
     name: string ->
     to_yojson: ('a -> Yojson.Safe.json) ->
-    of_yojson: (Yojson.Safe.json -> ('a, string) result) ->
+    of_yojson: (Yojson.Safe.json -> ('a, string) Result.result) ->
     unit -> 'a t
 
   (** Declare a new type that marshal/unmarshal to strings. *)
   val make_string:
     name: string ->
     to_string: ('a -> string) ->
-    of_string: (string -> ('a, string) result) ->
+    of_string: (string -> ('a, string) Result.result) ->
     unit -> 'a t
 
   (** How to represent exceptions. *)
@@ -73,11 +73,16 @@ module Type : sig
   val int64: int64 t
 
   (** Build a representation of a [result]. *)
-  val result : 'a t -> 'b t -> ('a, 'b) result t
+  val result : 'a t -> 'b t -> ('a, 'b) Result.result t
 
   (** Build a ['b] type which has the same JSON encoding as the ['a] type from
       conversion functions [read] and [write]. *)
-  val view : name:string -> read:('a -> ('b, string) result) -> write:('b -> 'a) -> 'a t -> 'b t
+  val view :
+    name:string ->
+    read:('a -> ('b, string) Result.result) ->
+    write:('b -> 'a) ->
+    'a t ->
+    'b t
 end
 
 module Field : sig
@@ -193,7 +198,7 @@ end
 val to_yojson: 'a t -> Yojson.Safe.json
 
 (** Convert a JSON value into a given schema. *)
-val of_yojson: 'a layout -> Yojson.Safe.json -> ('a t, string) result
+val of_yojson: 'a layout -> Yojson.Safe.json -> ('a t, string) Result.result
 
 module Util : sig
   (** Get the [Type.t] representation of a layout. *)

@@ -1,4 +1,5 @@
 open OUnit2
+open Result
 
 type r
 let rt : r Record.layout = Record.Unsafe.declare "r"
@@ -17,25 +18,25 @@ struct
   let () = Rres.seal ()
 end
 
-let set_get ctxt =
+let set_get _ctxt =
   let r = Record.Unsafe.make rt in
   Record.set r x 2;
   assert_equal 2 (Record.get r x)
 
-let safe_set_get ctxt =
+let safe_set_get _ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   Record.set r x 2;
   assert_equal 2 (Record.get r x)
 
-let get_undef ctxt =
+let get_undef _ctxt =
   let r = Record.Unsafe.make rt in
   let e = Record.UndefinedField "x" in
   assert_raises e (fun () ->
     Record.get r x
   )
 
-let safe_get_undef ctxt =
+let safe_get_undef _ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   let e = Record.UndefinedField "x" in
@@ -43,33 +44,33 @@ let safe_get_undef ctxt =
     Record.get r x
   )
 
-let extend_after_seal ctxt =
+let extend_after_seal _ctxt =
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
     Record.Unsafe.field rt "y" Record.Type.int
   )
 
-let safe_extend_after_seal ctxt =
+let safe_extend_after_seal _ctxt =
   let open Safe_layouts in
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
     Record.Unsafe.field Rt.layout "y" Record.Type.int
   )
 
-let seal_twice ctxt =
+let seal_twice _ctxt =
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
     Record.Unsafe.seal rt
   )
 
-let safe_seal_twice ctxt =
+let safe_seal_twice _ctxt =
   let open Safe_layouts in
   let e = Record.ModifyingSealedStruct "r" in
   assert_raises e (fun () ->
     Record.Unsafe.seal Rt.layout
   )
 
-let make_unsealed ctxt (type r2) =
+let make_unsealed _ctxt (type r2) =
   let rt2 : r2 Record.layout = Record.Unsafe.declare "r2" in
   let _x2 = Record.Unsafe.field rt2 "x2" Record.Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
@@ -77,7 +78,7 @@ let make_unsealed ctxt (type r2) =
     Record.Unsafe.make rt2
   )
 
-let safe_make_unsealed ctxt (type r2) =
+let safe_make_unsealed _ctxt =
   let module Rt2 = (val Record.Safe.declare "r2") in
   let _x2 = Rt2.field "x2" Record.Type.int in
   let e = Record.AllocatingUnsealedStruct "r2" in
@@ -85,13 +86,13 @@ let safe_make_unsealed ctxt (type r2) =
     Rt2.make ()
   )
 
-let layout_name ctxt =
+let layout_name _ctxt =
   assert_equal "r" (Record.Unsafe.layout_name rt)
 
-let safe_layout_name ctxt =
+let safe_layout_name _ctxt =
   assert_equal "r" Safe_layouts.Rt.layout_name
 
-let layout_id ctxt =
+let layout_id _ctxt =
   let id1 = Record.Unsafe.layout_id rt in
   let id2 = Record.Unsafe.layout_id rt in
   let id3 = Record.Polid.fresh () in
@@ -99,25 +100,25 @@ let layout_id ctxt =
   assert_equal ~msg:"layout_id is pure (int)" (Record.Polid.to_int id1) (Record.Polid.to_int id2);
   assert_bool "fresh returns a different id" (Record.Polid.equal id1 id3 = Record.Polid.Different)
 
-let safe_layout_id ctxt =
+let safe_layout_id _ctxt =
   let open Safe_layouts in
   let id1 = Rt.layout_id in
   let id2 = Record.Polid.fresh () in
   assert_bool "fresh returns a different id" (Record.Polid.equal id1 id2 = Record.Polid.Different)
 
-let field_name ctxt =
+let field_name _ctxt =
   assert_equal "x" (Record.Field.name x)
 
-let safe_field_name ctxt =
+let safe_field_name _ctxt =
   assert_equal "x" (Record.Field.name Safe_layouts.x)
 
-let field_type ctxt =
+let field_type _ctxt =
   assert_equal "int" (Record.Type.name (Record.Field.ftype x))
 
-let safe_field_type ctxt =
+let safe_field_type _ctxt =
   assert_equal "int" (Record.Type.name (Record.Field.ftype Safe_layouts.x))
 
-let record_layout ctxt =
+let record_layout _ctxt =
   let r = Record.Unsafe.make rt in
   let l = Record.get_layout r in
   assert_bool "layout is the same"
@@ -126,7 +127,7 @@ let record_layout ctxt =
       (Record.Unsafe.layout_id rt)
     )
 
-let safe_record_layout ctxt =
+let safe_record_layout _ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   let l = Record.get_layout r in
@@ -140,24 +141,24 @@ let force = function
   | Ok x -> x
   | Error _ -> assert false
 
-let of_json ctxt =
+let of_json _ctxt =
   let j = `Assoc [("x", `Int 2)] in
   let r = force @@ Record.of_yojson rt j in
   assert_equal 2 (Record.get r x)
 
-let safe_of_json ctxt =
+let safe_of_json _ctxt =
   let j = `Assoc [("x", `Int 2)] in
   let r = force @@ Record.of_yojson Safe_layouts.Rt.layout j in
   assert_equal 2 (Record.get r Safe_layouts.x)
 
-let to_json ctxt =
+let to_json _ctxt =
   let r = Record.Unsafe.make rt in
   Record.set r x 2;
   let expected = `Assoc [("x", `Int 2)] in
   let printer = Yojson.Safe.pretty_to_string in
   assert_equal ~printer expected (Record.to_yojson r)
 
-let safe_to_json ctxt =
+let safe_to_json _ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   Record.set r x 2;
@@ -165,20 +166,20 @@ let safe_to_json ctxt =
   let printer = Yojson.Safe.pretty_to_string in
   assert_equal ~printer expected (Record.to_yojson r)
 
-let to_json_null ctxt =
+let to_json_null _ctxt =
   let r = Record.Unsafe.make rt in
   let expected = `Assoc [("x", `Null)] in
   let printer = Yojson.Safe.pretty_to_string in
   assert_equal ~printer expected (Record.to_yojson r)
 
-let safe_to_json_null ctxt =
+let safe_to_json_null _ctxt =
   let open Safe_layouts in
   let r = Rt.make () in
   let expected = `Assoc [("x", `Null)] in
   let printer = Yojson.Safe.pretty_to_string in
   assert_equal ~printer expected (Record.to_yojson r)
 
-let safe_json_result ctxt =
+let safe_json_result _ctxt =
   let open Safe_layouts in
   let r = Rres.make () in
   Record.set r value_r1 (Ok 35);
@@ -196,16 +197,16 @@ let safe_json_result ctxt =
   let recovered_2 = force @@ Record.of_yojson Rres.layout json in
   assert_equal (Error "no") (Record.get recovered_2 value_r2)
 
-let declare0 ctxt =
+let declare0 _ctxt =
   let l = Record.Util.declare0 ~name:"r" in
   assert_equal "r" (Record.Unsafe.layout_name l)
 
-let declare1 ctxt =
+let declare1 _ctxt =
   let (l, f) = Record.Util.declare1 ~name:"r" ~f1_name:"x" ~f1_type:Record.Type.int in
   assert_equal "r" (Record.Unsafe.layout_name l);
   assert_equal "x" (Record.Field.name f)
 
-let declare2 ctxt =
+let declare2 _ctxt =
   let (l, f1, f2) =
     Record.Util.declare2 ~name:"r"
       ~f1_name:"f1" ~f1_type:Record.Type.int
@@ -215,7 +216,7 @@ let declare2 ctxt =
   assert_equal "f1" (Record.Field.name f1);
   assert_equal "f2" (Record.Field.name f2)
 
-let declare3 ctxt =
+let declare3 _ctxt =
   let (l, f1, f2, f3) =
     Record.Util.declare3 ~name:"r"
       ~f1_name:"f1" ~f1_type:Record.Type.int
@@ -227,7 +228,7 @@ let declare3 ctxt =
   assert_equal "f2" (Record.Field.name f2);
   assert_equal "f3" (Record.Field.name f3)
 
-let declare4 ctxt =
+let declare4 _ctxt =
   let (l, f1, f2, f3, f4) =
     Record.Util.declare4 ~name:"r"
       ~f1_name:"f1" ~f1_type:Record.Type.int

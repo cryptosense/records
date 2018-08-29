@@ -1,0 +1,7 @@
+(test
+  (name tests)
+  (libraries
+    oUnit
+    records
+  )
+)
