@@ -1,22 +1,22 @@
-opam-version: "1.2"
+opam-version: "2.0"
 maintainer: "Etienne Millon <etienne@cryptosense.com>"
 authors: "Etienne Millon <etienne@cryptosense.com>"
 homepage: "https://github.com/cryptosense/records"
 bug-reports: "https://github.com/cryptosense/records/issues"
 license: "BSD-2"
-dev-repo: "https://github.com/cryptosense/records.git"
+dev-repo: "git+https://github.com/cryptosense/records.git"
 doc: "https://cryptosense.github.io/records/doc"
 build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
-build-test: [
+run-test: [
   ["dune" "runtest" "-p" name "-j" jobs]
 ]
 depends: [
   "dune" {build & >= "1.1.0"}
-  "ounit" {test & >= "2.0.0"}
+  "ocaml" {>= "4.02.0"}
+  "ounit" {with-test & >= "2.0.0"}
   "result"
   "yojson"
 ]
 tags: ["org:cryptosense"]
-available: [ocaml-version >= "4.02.0"]
