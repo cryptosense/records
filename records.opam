@@ -20,3 +20,7 @@ depends: [
   "yojson"
 ]
 tags: ["org:cryptosense"]
+synopsis: "Dynamic records"
+description: """
+This library enables you to define and manipulate dynamic records in OCaml.
+"""
