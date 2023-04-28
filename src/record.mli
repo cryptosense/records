@@ -34,14 +34,14 @@ module Type : sig
   type 'a t
 
   val name : 'a t -> string
-  val of_yojson : 'a t -> (Yojson.Safe.json -> ('a, string) Result.result)
-  val to_yojson : 'a t -> ('a -> Yojson.Safe.json)
+  val of_yojson : 'a t -> (Yojson.Safe.t -> ('a, string) Result.result)
+  val to_yojson : 'a t -> ('a -> Yojson.Safe.t)
 
   (** Declare a new type. *)
   val make:
     name: string ->
-    to_yojson: ('a -> Yojson.Safe.json) ->
-    of_yojson: (Yojson.Safe.json -> ('a, string) Result.result) ->
+    to_yojson: ('a -> Yojson.Safe.t) ->
+    of_yojson: (Yojson.Safe.t -> ('a, string) Result.result) ->
     unit -> 'a t
 
   (** Declare a new type that marshal/unmarshal to strings. *)
@@ -195,10 +195,10 @@ end
 (** {2 Miscellaneous} *)
 
 (** Convert a record to JSON. *)
-val to_yojson: 'a t -> Yojson.Safe.json
+val to_yojson: 'a t -> Yojson.Safe.t
 
 (** Convert a JSON value into a given schema. *)
-val of_yojson: 'a layout -> Yojson.Safe.json -> ('a t, string) Result.result
+val of_yojson: 'a layout -> Yojson.Safe.t -> ('a t, string) Result.result
 
 module Util : sig
   (** Get the [Type.t] representation of a layout. *)

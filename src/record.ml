@@ -34,8 +34,8 @@ end
 module Type = struct
   type 'a t =
     { name: string;
-      to_yojson: ('a -> Yojson.Safe.json);
-      of_yojson: (Yojson.Safe.json -> ('a, string) result);
+      to_yojson: ('a -> Yojson.Safe.t);
+      of_yojson: (Yojson.Safe.t -> ('a, string) result);
     }
 
   let name t = t.name
@@ -303,7 +303,7 @@ let set record field value =
    error, map them to `Null, or skip the field. If some fields might
    not be set, we should use the 2nd or the 3rd. Maybe this kind of
    behavior could be set at field creation time? *)
-let to_yojson (type s) (s : s t) : Yojson.Safe.json =
+let to_yojson (type s) (s : s t) : Yojson.Safe.t =
   let fields =
     List.map
       (fun (BoxedField f) ->
@@ -320,7 +320,7 @@ let to_yojson (type s) (s : s t) : Yojson.Safe.json =
 
 (* todo: the error handling here is plain wrong. Should do something
    special in the `Null case.  *)
-let of_yojson (type s) (s: s layout) (json: Yojson.Safe.json) : (s t, string) result =
+let of_yojson (type s) (s: s layout) (json: Yojson.Safe.t) : (s t, string) result =
   let open Json_safe in
   let r = Unsafe.make s in
   let field_value (BoxedField f) =
