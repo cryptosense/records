@@ -1,3 +1,11 @@
+## v1.0.0
+
+*2023-04-28*
+
+- Build with Dune >= 2.0.
+- Require OCaml >= 4.08.
+- Require Yojson >= 1.6 and support Yojson 2.x.
+
 ## v0.8.0
 
 *2017-01-03*

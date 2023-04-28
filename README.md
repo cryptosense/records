@@ -1,4 +1,4 @@
-# Dynamic records
+# Dynamic records
 
 [![Build Status][build_status_badge]][build_status_link]
 
