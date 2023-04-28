@@ -1,7 +1,6 @@
-[![Build Status](https://travis-ci.org/cryptosense/records.svg)](https://travis-ci.org/cryptosense/records) [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://cryptosense.github.io/records/doc/)
+# Dynamic records
 
-Dynamic records
-===============
+[![Build Status][build_status_badge]][build_status_link]
 
 This library enables you to define and manipulate dynamic records in OCaml.
 
@@ -54,3 +53,6 @@ The last line outputs:
 
 This library is available under the 2-clause BSD license.
 See `COPYING` for more information.
+
+[build_status_badge]: https://github.com/cryptosense/records/actions/workflows/main.yml/badge.svg
+[build_status_link]: https://github.com/cryptosense/records/actions/workflows/main.yml
